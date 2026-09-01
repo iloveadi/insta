@@ -24,6 +24,15 @@ export const SlideCard: React.FC<SlideCardProps> = ({
   const baseWidth = 1080;
   const baseHeight = 1350;
 
+  // Meaningful tag fallback (No weird English like "SPECIAL REPORT")
+  const displayTag = slide.tag || (
+    slide.type === 'cover' 
+      ? '🔥 실전 핵심 가이드' 
+      : slide.type === 'cta' 
+      ? '💾 SAVE & SHARE' 
+      : `💡 실전 꿀팁 0${slide.page - 1}`
+  );
+
   return (
     <div
       style={{
@@ -43,22 +52,12 @@ export const SlideCard: React.FC<SlideCardProps> = ({
         }}
         className={`relative flex flex-col justify-between p-16 overflow-hidden ${theme.bgStyle} ${theme.textPrimary}`}
       >
-        {/* Crisp Gradient Decorative Accents (No blur filter artifacts) */}
-        <div className="absolute -top-32 -right-32 w-[600px] h-[600px] bg-indigo-500/10 rounded-full pointer-events-none" />
-        <div className="absolute -bottom-32 -left-32 w-[550px] h-[550px] bg-purple-500/10 rounded-full pointer-events-none" />
-
         {/* ── 1. TOP HEADER SECTION ── */}
         <div className="relative z-10 flex items-center justify-between w-full pt-2 flex-shrink-0">
           <div>
-            {slide.tag ? (
-              <span className={`px-6 py-3 rounded-full text-xl font-black tracking-wide uppercase shadow-md ${theme.tagBg} ${theme.tagText}`}>
-                {slide.tag}
-              </span>
-            ) : (
-              <span className="px-5 py-2.5 rounded-full text-lg font-bold bg-white/10 text-slate-300">
-                SPECIAL REPORT
-              </span>
-            )}
+            <span className={`px-6 py-3 rounded-full text-xl font-black tracking-wide shadow-md ${theme.tagBg} ${theme.tagText}`}>
+              {displayTag}
+            </span>
           </div>
 
           <div className="flex items-center space-x-2.5 px-6 py-2.5 rounded-full bg-black/40 border border-white/15 text-xl font-bold tracking-tight shadow-sm">
@@ -276,8 +275,8 @@ export const SlideCard: React.FC<SlideCardProps> = ({
 
         {/* ── 3. BOTTOM FOOTER SECTION ── */}
         <div className="relative z-10 flex items-center justify-between w-full pb-2 pt-4 border-t border-white/15 text-2xl font-bold opacity-85 flex-shrink-0">
-          <div className="flex items-center space-x-2">
-            <span>INSTAGRAM 4:5 CAROUSEL</span>
+          <div className="flex items-center space-x-2 text-slate-400">
+            <span>{brandHandle}</span>
           </div>
 
           <div className="flex items-center space-x-2 px-6 py-2 rounded-full bg-white/10">
