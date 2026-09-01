@@ -6,15 +6,13 @@ export interface VersionInfo {
 }
 
 export const APP_VERSION: VersionInfo = {
-  version: '1.2.1',
-  codename: 'Dynamic-Shuffle & API-Tester',
+  version: '1.2.2',
+  codename: 'Gemini-1.5-Flash-Standard',
   releaseDate: '2026-09-02',
   highlights: [
-    'API 설정 모달 내 원클릭 Gemini API 키 유효성 테스트 버튼 추가',
-    'API 키 미등록 상태에서도 클릭마다 매번 새로운 내용이 생성되는 다이내믹 셔플 엔진 탑재',
-    'Gemini 2.5 Flash / 2.0 / 1.5 모델 자동 폴백 시스템 구축',
-    '화이트/라이트 테마 (클린 미니멀, 파스텔) 텍스트 시인성 100% 개선',
-    '인스타 시선강탈 보색 대비 테마 4종 신규 추가 (총 10종 테마 지원)',
-    '상단 로고 클릭 시 즉시 새로고침(Reset/Reload) 기능'
+    'Google Gemini 공식 gemini-1.5-flash 표준 엔드포인트 단일화',
+    'API 키 복사 시 앞뒤 공백 자동 trim 처리 필수 적용',
+    '키 유효성 테스트 시 초경량 ping 페이로드 호출 및 상세 콘솔 에러 로깅 보강',
+    '100% 실시간 Google Gemini API 생성 파이프라인 정립'
   ]
 };
