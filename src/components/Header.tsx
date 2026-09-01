@@ -54,27 +54,14 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Action Controls */}
         <div className="flex items-center space-x-2 sm:space-x-3">
-          {/* API Key Status / Settings */}
+          {/* AI Status / Settings */}
           <button
             onClick={onOpenSettings}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-              hasApiKey
-                ? 'bg-emerald-950/40 text-emerald-300 border-emerald-500/40 hover:bg-emerald-900/40'
-                : 'bg-amber-950/30 text-amber-300 border-amber-500/30 hover:bg-amber-900/40'
-            }`}
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer bg-emerald-950/40 text-emerald-300 border-emerald-500/40 hover:bg-emerald-900/40"
           >
-            {hasApiKey ? (
-              <>
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="hidden md:inline">Gemini API 연동됨</span>
-                <span className="md:hidden">API OK</span>
-              </>
-            ) : (
-              <>
-                <Key className="w-3.5 h-3.5 text-amber-400" />
-                <span>API 키 설정</span>
-              </>
-            )}
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="hidden md:inline">AI 엔진 활성화됨</span>
+            <span className="md:hidden">AI OK</span>
           </button>
 
           {/* Quick ZIP Export Button */}
