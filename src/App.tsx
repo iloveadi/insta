@@ -7,7 +7,6 @@ import { THEME_PRESETS, VIRAL_QUICK_CATEGORIES } from './constants/themes';
 import type { ViralQuickCategory } from './constants/themes';
 import { 
   generateCardNews, 
-  generateDynamicSmartProject, 
   generateViralByQuickCategory,
   generateByTargetAudience
 } from './services/geminiService';

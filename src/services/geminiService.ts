@@ -241,11 +241,29 @@ export async function generateByTargetAudience(
     apiKey,
   };
 
+export async function generateViralByQuickCategory(
+  category: ViralQuickCategory,
+  theme: ThemePresetId = 'modern_dark',
+  aspectRatio: AspectRatio = '4:5',
+  brandHandle: string = '@kimppungsamssi',
+  apiKey?: string
+): Promise<{ project: CardNewsProject; resolvedTopic: string; resolvedCategory: CardNewsCategory }> {
+  const randomTopicItem = category.topics[Math.floor(Math.random() * category.topics.length)];
+  const req: GenerationRequest = {
+    topic: randomTopicItem.topic,
+    targetAudience: category.target,
+    category: randomTopicItem.format,
+    slideCount: 5,
+    theme: category.defaultTheme || theme,
+    aspectRatio,
+    brandHandle,
+    apiKey,
+  };
+
   const project = await generateCardNews(req);
   return {
     project,
     resolvedTopic: project.topic,
     resolvedCategory: project.card_type,
-    resolvedTheme: project.theme_type,
   };
 }
