@@ -89,6 +89,12 @@ export function App() {
         apiKey: apiKey.trim(),
       });
       setProject(generated);
+      setFormData(prev => ({
+        ...prev,
+        topic: generated.topic,
+        category: generated.card_type,
+        theme: generated.theme_type,
+      }));
       setActiveSlideIndex(0);
       confetti({
         particleCount: 50,

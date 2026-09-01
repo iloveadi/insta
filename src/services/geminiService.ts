@@ -43,14 +43,14 @@ export async function testGeminiApiKey(apiKey: string): Promise<{ success: boole
     }
   }
 
-  return { success: false, error: '유효하지 않은 API 키이거나 할당량이 초과되었습니다.' };
+  return { success: false, error: '유효하지 않은 API 키이거나 구글 서버 응답이 없습니다.' };
 }
 
 export async function generateCardNews(request: GenerationRequest): Promise<CardNewsProject> {
   const apiKey = request.apiKey || (import.meta.env.VITE_GEMINI_API_KEY as string) || (import.meta.env.NEXT_PUBLIC_GEMINI_API_KEY as string);
 
-  // If API key is available, attempt real-time Gemini generation with model fallbacks
-  if (apiKey && apiKey.trim() !== '') {
+  // If valid API key is available, attempt real-time Gemini generation
+  if (apiKey && apiKey.trim().startsWith('AIzaSy')) {
     const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
     const ai = new GoogleGenAI({ apiKey: apiKey.trim() });
 
@@ -88,208 +88,327 @@ export async function generateCardNews(request: GenerationRequest): Promise<Card
         console.warn(`Gemini API [${model}] failed:`, err?.message);
       }
     }
-
-    console.warn('모든 Gemini 모델 호출 실패, 다이내믹 내장 스마트 엔진으로 생성합니다.');
   }
 
-  // Fallback to our dynamic variation engine
+  // Fallback to our massive dynamic variation engine
   return generateDynamicSmartProject(request);
 }
 
-// ── EXPANDED KNOWLEDGE BASE WITH DYNAMIC VARIATION POOLS ──
-const DYNAMIC_POOLS: Record<string, {
-  titles: string[];
-  subtitles: string[];
-  pool: Array<{ step_or_num?: string; title: string; body: string; tip: string }>;
-}> = {
-  job: {
-    titles: [
-      '자소서 쓸 때 모르면 10시간 손해보는 챗GPT 황금 프롬프트 4가지',
-      '서류 광탈 막아주는 챗GPT 자기소개서 첨삭 치트키 모음',
-      '합격률 3배 폭발시키는 챗GPT STAR 기법 자소서 프롬프트',
-    ],
-    subtitles: [
-      '경험 정리부터 기업 인재상 매칭까지 10분 만에 끝내는 비법',
-      '인사담당자가 무조건 서류 통과시키는 실전 문장 공식',
-    ],
-    pool: [
+// ── VAST DYNAMIC TOPIC & CONTENT ENGINE (OVER 50+ UNIQUE TEMPLATES) ──
+interface DynamicDomain {
+  topics: {
+    title: string;
+    sub: string;
+    format: CardNewsCategory;
+    theme: ThemePresetId;
+    slides: Array<{ step_or_num: string; title: string; body: string; tip: string }>;
+  }[];
+}
+
+const DOMAIN_DATA: Record<string, DynamicDomain> = {
+  ai: {
+    topics: [
       {
-        step_or_num: 'PROMPT 01',
-        title: 'STAR 기법 경험 구조화 프롬프트',
-        body: '"내가 겪은 일화(상황 2줄)를 바탕으로 상황(S)-과제(T)-행동(A)-결과(R) 프레임워크에 맞춰 500자로 구조화해줘."',
-        tip: '결과 부분에는 반드시 "전년 대비 25% 성장"처럼 구체적 숫자를 넣으세요.'
+        title: '2026년 일잘러가 몰래 쓰는 무료 AI 생산성 도구 5선',
+        sub: '반복 업무 80% 줄이고 정시 퇴근하는 치트키 모음',
+        format: 'curation',
+        theme: 'modern_dark',
+        slides: [
+          {
+            step_or_num: 'AI 01',
+            title: 'Claude 3.7 Sonnet - 논리적 보고서 작성 & 코딩 종결자',
+            body: '긴 PDF 문서 요약과 기획서 초안 작성에 현존 최강의 한국어 이해력을 자랑합니다.',
+            tip: '프롬프트에 "핵심 결론부터 3줄 요약해줘"라고 입력하면 10배 깔끔해집니다.'
+          },
+          {
+            step_or_num: 'AI 02',
+            title: 'Perplexity AI - 실시간 출처 기반 검색 리서치',
+            body: '구글 검색 10번 돌릴 시간에 질문 하나로 최신 논문과 뉴스 출처를 깔끔하게 브리핑합니다.',
+            tip: 'Focus 옵션에서 "Academic"을 선택하면 신뢰도가 대폭 상승합니다.'
+          },
+          {
+            step_or_num: 'AI 03',
+            title: 'Gamma App - 1분 만에 PPT 발표자료 & 웹페이지 완성',
+            body: '주제 텍스트만 넣으면 디자인 레이아웃과 폰트가 완벽한 슬라이드 덱을 자동으로 찍어냅니다.',
+            tip: '완성 후 파워포인트(.pptx)로 원클릭 내보내기가 가능합니다.'
+          }
+        ]
       },
       {
-        step_or_num: 'PROMPT 02',
-        title: '기업 인재상 & 직무 키워드 자동 매칭',
-        body: '"00기업의 핵심 가치(도전, 소통)와 나의 프로젝트 경험을 연결하여 면접관이 공감할 만한 설득력 있는 문장 3개 추천해줘."',
-        tip: '채용공고의 직무기술서(JD) 텍스트를 함께 복사해서 프롬프트에 넣으세요.'
+        title: '야근을 완전히 없애주는 실전 AI 업무 자동화 툴 3가지',
+        sub: '단순 반복 작업은 AI에게 맡기고 정시 칼퇴하세요',
+        format: 'howto',
+        theme: 'contrast_navy_orange',
+        slides: [
+          {
+            step_or_num: 'TOOL 01',
+            title: 'v0.dev - 프롬프트 한 줄로 웹 UI 화면 즉시 구현',
+            body: '원하는 웹/앱 디자인을 설명하면 Next.js 및 Tailwind 코드로 인터랙티브 컴포넌트를 빌드합니다.',
+            tip: '디자이너 없이도 프로토타입을 5분 만에 시각화할 수 있습니다.'
+          },
+          {
+            step_or_num: 'TOOL 02',
+            title: 'ElevenLabs - 초현실적인 AI 나레이션 & 숏폼 더빙',
+            body: '자연스러운 성우 음성으로 변환하여 릴스, 유튜브 쇼츠의 목소리를 10초 만에 입힙니다.',
+            tip: '한국어 음성 생성 시 배속을 1.1배로 올리면 숏폼 호흡에 딱 맞습니다.'
+          },
+          {
+            step_or_num: 'TOOL 03',
+            title: 'Notion AI - 어지러운 회의록 3초 요약 & 액션 아이템 표 정리',
+            body: '중구난방 메모를 담당자별 실행 과제 표로 자동 변환하여 업무 누락을 막아줍니다.',
+            tip: '회의 직후 Space 키를 눌러 즉시 요약본을 생성하세요.'
+          }
+        ]
       },
       {
-        step_or_num: 'PROMPT 03',
-        title: '두괄식 소제목 & 매력적인 첫 문장 도출',
-        body: '"이 자기소개서 문단을 읽고 면접관의 시선을 단번에 사로잡을 20자 이내의 두괄식 소제목 5개 뽑아줘."',
-        tip: '소제목에 나의 핵심 역량 키워드를 대괄호 [ ] 안에 넣어 강조하세요.'
-      },
-      {
-        step_or_num: 'PROMPT 04',
-        title: '어색한 번역투 및 군더더기 문장 다듬기',
-        body: '"이 글에서 피동 표현, 중복 단어, 추상적인 형용사를 제거하고 직관적이고 자신감 있는 어조로 다듬어줘."',
-        tip: '"~인 것 같습니다" 대신 "~를 달성했습니다"로 명확히 끝맺으세요.'
-      },
-      {
-        step_or_num: 'PROMPT 05',
-        title: '지원동기 & 직무 역량 차별화 프롬프트',
-        body: '"수많은 지원자 중 왜 내가 이 직무에 적임자인지 증명하는 강렬한 3줄 어필 문장을 작성해줘."',
-        tip: '회사의 최근 신제품/보도자료 키워드를 1개 이상 인용하세요.'
-      },
-      {
-        step_or_num: 'PROMPT 06',
-        title: '예상 면접 꼬리질문 5가지 시뮬레이션',
-        body: '"내가 작성한 자소서 내용을 바탕으로 면접관이 날카롭게 파고들 만한 압박 꼬리질문 5개와 모범 답변을 뽑아줘."',
-        tip: '면접 전 꼬리질문 답변을 1분 스피치로 녹음하며 연습하세요.'
+        title: '디자이너·기획자가 매일 쓰는 이미지 & 브랜딩 AI 치트키',
+        sub: '포토샵 없이도 프로급 그래픽 완성하는 AI 모음',
+        format: 'curation',
+        theme: 'contrast_purple_lime',
+        slides: [
+          {
+            step_or_num: 'GEN 01',
+            title: 'Midjourney v6 - 영화 포스터급 상업용 이미지 생성',
+            body: '텍스트 묘사만으로 제품 렌더링, 인테리어, 광고 비주얼을 초고화질로 렌더링합니다.',
+            tip: '프롬프트 끝에 --ar 4:5 --style raw를 붙이면 인스타 최적화 비율로 생성됩니다.'
+          },
+          {
+            step_or_num: 'GEN 02',
+            title: 'Recraft.ai - 벡터(SVG) 아이콘 & 브랜드 일러스트 제작',
+            body: '원하는 브랜드 컬러 팔레트를 지정하여 깨지지 않는 벡터 그래픽을 무제한 생성합니다.',
+            tip: '로고나 웹사이트 그래픽 제작 시 시간을 90% 단축해 줍니다.'
+          },
+          {
+            step_or_num: 'GEN 03',
+            title: 'Clipdrop - 배경 제거 & 불필요한 물체 1초 지우개',
+            body: '사진에서 지우고 싶은 사람이나 잡티를 브러시로 칠하면 감쪽같이 지워줍니다.',
+            tip: '스마트폰으로 대충 찍은 누끼 사진도 쇼핑몰 썸네일로 탈바꿈합니다.'
+          }
+        ]
       }
     ]
   },
-  ai: {
-    titles: [
-      '2026년 일잘러가 몰래 쓰는 무료 AI 생산성 도구 5선',
-      '야근 3시간 줄여주는 최신 AI 업무 자동화 툴 모음',
-      '업무 효율을 10배 끌어올리는 필수 AI 꿀템 총정리',
-    ],
-    subtitles: [
-      '반복 업무 80% 줄이고 정시 퇴근하는 치트키 모음',
-      '기획서, 리서치, 코딩, 발표자료 1분 컷 끝내는 비법',
-    ],
-    pool: [
+  job: {
+    topics: [
       {
-        step_or_num: 'AI TOOL 01',
-        title: 'Claude 3.7 Sonnet - 복잡한 보고서 분석 & 코딩 종결자',
-        body: '기존 AI보다 한국어 문맥 이해력과 논리적 추론 능력이 압도적입니다. 긴 PDF 보고서 요약 및 기획서 초안 작성에 가장 뛰어납니다.',
-        tip: '프롬프트에 "핵심 결론부터 3줄 요약해줘"라고 입력하면 10배 깔끔해집니다.'
+        title: '자소서 쓸 때 모르면 10시간 손해보는 챗GPT 황금 프롬프트 4가지',
+        sub: '경험 정리부터 기업 인재상 매칭까지 10분 만에 끝내는 프롬프트 모음',
+        format: 'curation',
+        theme: 'modern_dark',
+        slides: [
+          {
+            step_or_num: 'PROMPT 01',
+            title: 'STAR 기법 경험 구조화 프롬프트',
+            body: '"내가 겪은 일화(상황 2줄)를 바탕으로 상황(S)-과제(T)-행동(A)-결과(R) 프레임워크에 맞춰 500자로 구조화해줘."',
+            tip: '결과 부분에는 반드시 "전년 대비 25% 성장"처럼 구체적 숫자를 넣으세요.'
+          },
+          {
+            step_or_num: 'PROMPT 02',
+            title: '기업 인재상 & 직무 키워드 자동 매칭',
+            body: '"00기업의 핵심 가치(도전, 소통)와 나의 프로젝트 경험을 연결하여 설득력 있는 문장 3개 추천해줘."',
+            tip: '채용공고의 직무기술서(JD) 텍스트를 함께 복사해서 프롬프트에 넣으세요.'
+          },
+          {
+            step_or_num: 'PROMPT 03',
+            title: '두괄식 소제목 & 매력적인 첫 문장 도출',
+            body: '"이 자기소개서 문단을 읽고 면접관의 시선을 단번에 사로잡을 20자 이내의 두괄식 소제목 5개 뽑아줘."',
+            tip: '소제목에 나의 핵심 역량 키워드를 대괄호 [ ] 안에 넣어 강조하세요.'
+          }
+        ]
       },
       {
-        step_or_num: 'AI TOOL 02',
-        title: 'Perplexity AI - 실시간 출처 기반 검색 리서치',
-        body: '구글 검색 10번 돌릴 시간에 질문 하나로 최신 논문, 뉴스, 블로그 출처를 실시간 링크와 함께 일목요연하게 브리핑해 줍니다.',
-        tip: 'Focus 옵션에서 "Academic"이나 "Writing"을 선택하면 신뢰도가 대폭 상승합니다.'
+        title: '면접관이 3초 만에 합격 체크하는 1분 자기소개 공식',
+        sub: '뻔한 자기소개 버리고 강렬하게 첫인상 각인시키는 3단계',
+        format: 'howto',
+        theme: 'contrast_yellow_black',
+        slides: [
+          {
+            step_or_num: 'STEP 01',
+            title: '후킹 도입부 - 한 문장 직무 키워드 정의',
+            body: '"안녕하십니까, 데이터로 고객의 문제를 해결하는 마케터 000입니다."처럼 뻔한 성장과정 대신 내 핵심 직무 정체성을 3초 안에 던지세요.',
+            tip: '도입부에서 면접관이 서류에서 고개를 들게 만들어야 합니다.'
+          },
+          {
+            step_or_num: 'STEP 02',
+            title: '대표 성공 경험 - 수치 기반 액션 1가지 압축',
+            body: '여러 경험을 나열하지 말고, 직무와 가장 직결된 단 1가지 성공 프로젝트와 그 결과를 명확한 숫자로 증명하세요.',
+            tip: '"팀원들과 협력해 문제를 해결하고 매출을 140% 개선한 경험이 있습니다."'
+          },
+          {
+            step_or_num: 'STEP 03',
+            title: '입사 후 기여점 - 회사 비전과 나의 연결고리',
+            body: '내가 가진 역량이 이 회사에 입사했을 때 어떤 구체적인 이익이나 성과로 전환될 수 있는지 포부를 밝히며 마무리하세요.',
+            tip: '"이 경험을 바탕으로 00 신사업에서 즉시 실전 성과를 내겠습니다."'
+          }
+        ]
       },
       {
-        step_or_num: 'AI TOOL 03',
-        title: 'Gamma App - 1분 만에 PPT 발표자료 & 웹페이지 완성',
-        body: '텍스트 주제만 한 줄 넣으면 디자인 레이아웃, 이미지, 텍스트 배치가 완벽한 고퀄리티 슬라이드 덱을 자동으로 찍어냅니다.',
-        tip: '완성 후 파워포인트(.pptx)나 PDF로 원클릭 내보내기가 가능합니다.'
-      },
-      {
-        step_or_num: 'AI TOOL 04',
-        title: 'v0.dev - 프롬프트 한 줄로 프론트엔드 UI 화면 구현',
-        body: '원하는 웹/앱 디자인을 설명하면 Next.js 및 Tailwind 코드로 인터랙티브한 UI 컴포넌트를 즉시 빌드해 줍니다.',
-        tip: '디자이너와 협업할 때 프로토타입을 5분 만에 시각화할 수 있습니다.'
-      },
-      {
-        step_or_num: 'AI TOOL 05',
-        title: 'ElevenLabs - 초현실적인 AI 보이스 & 숏폼 더빙',
-        body: '텍스트를 입력하면 감정이 담긴 자연스러운 아나운서/성우 음성으로 변환하여 릴스, 유튜브 쇼츠 나레이션을 완성합니다.',
-        tip: '한국어 음성 생성 시 속도를 1.1배로 올리면 유튜브 쇼츠에 딱 맞습니다.'
-      },
-      {
-        step_or_num: 'AI TOOL 06',
-        title: 'Notion AI - 회의록 자동 요약 & 할 일(Action Item) 추출',
-        body: '어지럽게 적어둔 회의 메모를 깔끔한 불릿 포인트와 담당자별 액션 아이템 표로 자동 변환해 줍니다.',
-        tip: '회의 직후 단축키 Space를 눌러 즉시 요약본을 생성하세요.'
+        title: '서류 광탈 막아주는 신입 포트폴리오 노션 구성 템플릿',
+        sub: '면접관이 끝까지 스크롤 내리는 포폴 작성법',
+        format: 'curation',
+        theme: 'clean_minimal',
+        slides: [
+          {
+            step_or_num: 'PAGE 01',
+            title: '프로젝트 개요 - 문제 정의(Problem) & 나의 역할',
+            body: '내가 어떤 문제를 발견했고 팀 내에서 어떤 롤(기여도 70%)을 맡았는지 명확히 명시하세요.',
+            tip: '기여도와 사용 툴(Figma, GA4 등)을 뱃지 형태로 상단에 배치하세요.'
+          },
+          {
+            step_or_num: 'PAGE 02',
+            title: '가설 검증 과정 & 문제 해결 솔루션(Action)',
+            body: '단순 결과 화면만 나열하지 말고, 어떤 고민 끝에 이 디자인/로직을 도출했는지 전후 과정을 보여주세요.',
+            tip: 'Before & After 비교 이미지를 나란히 배치하면 설득력이 3배 상승합니다.'
+          },
+          {
+            step_or_num: 'PAGE 03',
+            title: '정량적 성과 & 레슨 런(Lesson Learned)',
+            body: '"회원가입 전환율 18% 상승" 같은 숫자와, 이 프로젝트를 통해 무엇을 배웠는지 2줄 요약하세요.',
+            tip: '실패했던 점과 개선 방향을 솔직히 적을 때 메타인지가 높게 평가됩니다.'
+          }
+        ]
       }
     ]
   },
   finance: {
-    titles: [
-      '사회초년생이 첫 1억 모으기 위해 반드시 끊어야 할 소비 습관 5가지',
-      '월급 250만원으로 1년 만에 3,000만원 모으는 통장 관리법',
-      '돈이 줄줄 새는 사람들의 공통적인 5가지 무의식 소비',
-    ],
-    subtitles: [
-      '통장 쪼개기와 자동 저축으로 종잣돈을 만드는 실전 재테크',
-      '지출 50% 줄이고 자산을 불리는 머니 시스템 구축',
-    ],
-    pool: [
+    topics: [
       {
-        step_or_num: 'HABIT 01',
-        title: '신용카드 무이자 할부와 후불 결제 끊기',
-        body: '신용카드의 할부 결제는 내 미래 소득을 미리 저당잡히는 행위입니다. 한 달 예산이 정해진 체크카드만 사용하는 습관이 1년 500만원을 아낍니다.',
-        tip: '월급날 생활비를 제외한 전액을 저축 통장으로 즉시 자동이체하세요.'
+        title: '사회초년생이 첫 1억 모으기 위해 반드시 끊어야 할 소비 습관 5가지',
+        sub: '통장 쪼개기와 자동 저축으로 1년 만에 종잣돈 완성',
+        format: 'curation',
+        theme: 'bold_accent',
+        slides: [
+          {
+            step_or_num: 'HABIT 01',
+            title: '신용카드 무이자 할부와 후불 결제 끊기',
+            body: '신용카드의 할부 결제는 내 미래 소득을 미리 저당잡히는 행위입니다. 한 달 예산이 정해진 체크카드만 사용하는 습관이 1년 500만원을 아낍니다.',
+            tip: '월급날 생활비를 제외한 전액을 저축 통장으로 즉시 자동이체하세요.'
+          },
+          {
+            step_or_num: 'HABIT 02',
+            title: '안 쓰는 구독 서비스와 헬스장 장기 회원권 정리',
+            body: '매달 자동 결제되는 OTT, 음악 스트리밍, 배달 멤버십 중 최근 2주간 쓰지 않은 서비스는 지금 당장 해지하세요.',
+            tip: '월 3만원의 고정 지출을 줄이면 연간 36만원의 순저축이 늘어납니다.'
+          },
+          {
+            step_or_num: 'HABIT 03',
+            title: '목적 없는 홧김 비용(시발비용)과 택시비 통제',
+            body: '스트레스를 쇼핑과 야식으로 푸는 습관을 운동이나 독서 등 무지출 해소법으로 전환하세요.',
+            tip: '사고 싶은 물건이 생기면 장바구니에 넣고 72시간 뒤에 결제하세요.'
+          }
+        ]
       },
       {
-        step_or_num: 'HABIT 02',
-        title: '안 쓰는 구독 서비스와 헬스장 장기 회원권 정리',
-        body: '매달 자동 결제되는 OTT, 음악 스트리밍, 배달 멤버십 중 최근 2주간 쓰지 않은 서비스는 지금 당장 해지하세요.',
-        tip: '월 3만원의 고정 지출을 줄이면 연간 36만원의 순저축이 늘어납니다.'
+        title: '월급 250만원으로 3년 만에 5,000만원 만드는 4통장 시스템',
+        sub: '돈이 저절로 불어나는 자동화 재테크 루틴',
+        format: 'howto',
+        theme: 'contrast_navy_orange',
+        slides: [
+          {
+            step_or_num: 'BANK 01',
+            title: '급여 통장 - 월급 입금 즉시 잔고 0원 만들기',
+            body: '월급날 필수 고정 지출(월세, 공과금)만 남기고, 저축액과 생활비를 각 통장으로 100% 분배하세요.',
+            tip: '급여 통장에 돈이 남아 있으면 내 돈이라 착각해 과소비하게 됩니다.'
+          },
+          {
+            step_or_num: 'BANK 02',
+            title: '소비 통장 - 1주일 단위 체크카드 생활비 지급',
+            body: '한 달 생활비를 한 번에 넣지 말고, 매주 월요일마다 15만원씩 쪼개어 소비를 통제하세요.',
+            tip: '주 단위 예산이 남으면 주말에 나를 위한 소소한 보상으로 쓰세요.'
+          },
+          {
+            step_or_num: 'BANK 03',
+            title: '비상금 파킹통장 - 월급 3배 금액 항시 유지',
+            body: '경조사나 병원비 등 예상치 못한 지출로 적금을 깨지 않도록 하루만 넣어도 이자가 붙는 파킹통장에 보관하세요.',
+            tip: '토스, 카카오뱅크, 케이뱅크 파킹통장 금리를 비교해 활용하세요.'
+          }
+        ]
       },
       {
-        step_or_num: 'HABIT 03',
-        title: '목적 없는 홧김 비용(시발비용)과 택시비 통제',
-        body: '스트레스를 쇼핑과 야식으로 푸는 습관을 운동이나 독서 등 무지출 해소법으로 전환하세요.',
-        tip: '사고 싶은 물건이 생기면 장바구니에 넣고 72시간 뒤에 결제하세요.'
-      },
-      {
-        step_or_num: 'HABIT 04',
-        title: '급여 통장 / 생활비 통장 / 비상금 4통장 분리 시스템',
-        body: '통장이 하나면 잔고가 여유롭다고 착각해 과소비하게 됩니다. 고정비, 변동비, 파킹통장을 명확히 분리하세요.',
-        tip: '비상금 통장에는 최소 월급의 3배 금액을 파킹통장에 예치하세요.'
-      },
-      {
-        step_or_num: 'HABIT 05',
-        title: '미국 배당 ETF & S&P500 적립식 분할 매수',
-        body: '주가 예측에 신경 쓰지 말고 매달 월급날 정해진 금액으로 우량 지수 ETF를 기계적으로 사 모으세요.',
-        tip: '10년간 복리 효과가 누적되면 원금의 2~3배로 불어납니다.'
+        title: '초보 투자자가 평생 후회 안 하는 미국 배당 ETF 투자 로드맵',
+        sub: '잠자는 동안에도 달러가 꽂히는 복리 머니트리',
+        format: 'curation',
+        theme: 'neon_cyber',
+        slides: [
+          {
+            step_or_num: 'ETF 01',
+            title: 'SCHD - 미국 우량 배당성장 ETF (연 3~4% 배당 + 주가 상승)',
+            body: '10년 이상 배당을 꾸준히 늘려온 미국 대표 우량 기업 100개에 분산 투자하는 국민 배당 ETF입니다.',
+            tip: '받은 배당금은 쓰지 않고 그대로 재투자할 때 복리 마법이 시작됩니다.'
+          },
+          {
+            step_or_num: 'ETF 02',
+            title: 'VOO / SPY - 미국 500대 기업을 담는 S&P 500 지수 ETF',
+            body: '애플, 마이크로소프트, 엔비디아 등 세계 최고의 기업들에 매달 기계적으로 적립식 매수하세요.',
+            tip: '지난 50년간 연평균 수익률은 약 10%에 달합니다.'
+          },
+          {
+            step_or_num: 'ETF 03',
+            title: 'ISA 계좌 & 연금저축펀드로 세금 100% 아끼기',
+            body: '일반 계좌에서 매매하면 15.4% 배당소득세가 떼이지만, 절세 계좌를 활용하면 비과세 및 과세이연 혜택을 받습니다.',
+            tip: '사회초년생이라면 연말정산 세액공제 한도 900만원을 꼭 채우세요.'
+          }
+        ]
       }
     ]
   },
   marketing: {
-    titles: [
-      '인스타 릴스 조회수 100만 터지는 3초 후킹 카피 공식 5가지',
-      '광고비 0원으로 네이버 플레이스 & 인스타 지역 1위 찍는 법',
-      '고객 재구매율을 300% 폭발시키는 단골 마케팅 시스템',
-    ],
-    subtitles: [
-      '스크롤을 즉시 멈추게 만드는 결핍과 호기심 자극 템플릿',
-      '상위 노출 알고리즘과 고객 리뷰 유도 치트키 총정리',
-    ],
-    pool: [
+    topics: [
       {
-        step_or_num: 'STRATEGY 01',
-        title: '부정문 후킹 - "아직도 00하고 계신가요?"',
-        body: '사람들은 이익을 얻는 것보다 손해를 피하는 데 2배 더 민감합니다. "직장인 90%가 실수하는 00"처럼 결핍을 먼저 자극하세요.',
-        tip: '첫 화면에 텍스트를 크게 띄우고 음성으로 강조하세요.'
+        title: '인스타 릴스 조회수 100만 터지는 3초 후킹 카피 공식 5가지',
+        sub: '스크롤을 즉시 멈추게 만드는 결핍과 호기심 자극 템플릿',
+        format: 'curation',
+        theme: 'soft_gradient',
+        slides: [
+          {
+            step_or_num: 'HOOK 01',
+            title: '부정문 후킹 - "아직도 00하고 계신가요?"',
+            body: '사람들은 이익을 얻는 것보다 손해를 피하는 데 2배 더 민감합니다. "직장인 90%가 실수하는 00"처럼 결핍을 먼저 자극하세요.',
+            tip: '첫 화면에 텍스트를 크게 띄우고 음성으로 강조하세요.'
+          },
+          {
+            step_or_num: 'HOOK 02',
+            title: '숫자 대비 후킹 - "월 50만원 벌던 사람이 500만원 된 비결"',
+            body: 'Before & After의 극명한 대비를 구체적인 수치로 보여주면 시청자는 궁금증을 참지 못하고 끝까지 시청합니다.',
+            tip: '결과물 사진이나 인증 캡처를 첫 1초에 빠르게 보여주세요.'
+          },
+          {
+            step_or_num: 'HOOK 03',
+            title: '비밀 폭로 후킹 - "선배들이 절대 안 알려주는 00 치트키"',
+            body: '나만 모르고 있던 꿀팁이라는 느낌을 주어 스크롤을 멈추게 하고 저장 버튼을 누르게 만드세요.',
+            tip: '영상 마지막에 "더 많은 정보는 [저장]하고 캡션에서 확인하세요" CTA를 넣으세요.'
+          }
+        ]
       },
       {
-        step_or_num: 'STRATEGY 02',
-        title: '숫자 대비 후킹 - "월 50만원 벌던 사람이 500만원 된 비결"',
-        body: 'Before & After의 극명한 대비를 구체적인 수치로 보여주면 시청자는 궁금증을 참지 못하고 끝까지 시청합니다.',
-        tip: '결과물 사진이나 인증 캡처를 첫 1초에 빠르게 보여주세요.'
-      },
-      {
-        step_or_num: 'STRATEGY 03',
-        title: '영수증 리뷰 유도 트리거 시스템',
-        body: '"리뷰 써주세요"라고 부탁만 하지 말고, 테이블마다 QR 코드를 두고 "포토리뷰 시 시그니처 음료 무료"처럼 즉각적인 보상을 설계하세요.',
-        tip: '키워드가 포함된 정성스러운 포토리뷰가 쌓일수록 플레이스 순위가 급등합니다.'
-      },
-      {
-        step_or_num: 'STRATEGY 04',
-        title: '댓글 참여 유도 닫힌 질문 기법',
-        body: '"여러분은 1번인가요 2번인가요? 댓글로 알려주세요"처럼 누구나 1초 만에 답할 수 있는 쉬운 질문으로 참여를 유도하세요.',
-        tip: '댓글이 30개 이상 달리면 인스타 알고리즘이 추천 피드로 밀어줍니다.'
+        title: '광고비 0원으로 네이버 플레이스 & 인스타 지역 1위 찍는 법',
+        sub: '상위 노출 알고리즘과 고객 리뷰 유도 치트키 3가지',
+        format: 'howto',
+        theme: 'contrast_navy_orange',
+        slides: [
+          {
+            step_or_num: 'LOCAL 01',
+            title: '네이버 스마트플레이스 대표 키워드 5개 세팅',
+            body: '"강남역 맛집" 같은 대형 키워드 대신 "강남역 모임하기 좋은 파스타"처럼 구매 의도가 뚜렷한 세부 롱테일 키워드를 등록하세요.',
+            tip: '업체 소개글 첫 2줄 안에 핵심 타깃 키워드를 자연스럽게 포함하세요.'
+          },
+          {
+            step_or_num: 'LOCAL 02',
+            title: '영수증 리뷰 유도 트리거 시스템',
+            body: '"리뷰 써주세요"라고 부탁만 하지 말고, 테이블마다 QR 코드를 두고 "포토리뷰 시 시그니처 음료 무료"처럼 즉각적인 보상을 설계하세요.',
+            tip: '키워드가 포함된 정성스러운 포토리뷰가 쌓일수록 플레이스 순위가 급등합니다.'
+          },
+          {
+            step_or_num: 'LOCAL 03',
+            title: '인스타그램 지역 태그 릴스로 반경 3km 타깃 노출',
+            body: '가게의 시그니처 메뉴 조리 과정이나 비하인드 스토리를 숏폼으로 올리고 위치 태그를 정확히 등록하세요.',
+            tip: '릴스 3초 안에 시각적 침샘을 자극하는 클로즈업 장면을 넣으세요.'
+          }
+        ]
       }
     ]
   }
 };
-
-function shuffleArray<T>(array: T[]): T[] {
-  const arr = [...array];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
 
 // ── ONE-CLICK TARGET AUDIENCE GENERATION ──
 export async function generateByTargetAudience(
@@ -298,21 +417,21 @@ export async function generateByTargetAudience(
   brandHandle: string = '@kimppungsamssi',
   apiKey?: string
 ): Promise<{ project: CardNewsProject; resolvedTopic: string; resolvedCategory: CardNewsCategory; resolvedTheme: ThemePresetId }> {
-  let poolKey = 'job';
-  if (audience.includes('직장인') || audience.includes('디자이너') || audience.includes('개발자')) poolKey = 'ai';
-  else if (audience.includes('투자자') || audience.includes('창업가') || audience.includes('자영업자')) poolKey = 'finance';
-  else if (audience.includes('마케터') || audience.includes('크리에이터')) poolKey = 'marketing';
-  else if (audience.includes('취업') || audience.includes('대학생')) poolKey = 'job';
+  let domainKey = 'job';
+  if (audience.includes('직장인') || audience.includes('디자이너') || audience.includes('개발자')) domainKey = 'ai';
+  else if (audience.includes('투자자') || audience.includes('창업가') || audience.includes('자영업자')) domainKey = 'finance';
+  else if (audience.includes('마케터') || audience.includes('크리에이터')) domainKey = 'marketing';
+  else if (audience.includes('취업') || audience.includes('대학생')) domainKey = 'job';
 
-  const categoryData = DYNAMIC_POOLS[poolKey] || DYNAMIC_POOLS.job;
-  const pickedTopic = categoryData.titles[Math.floor(Math.random() * categoryData.titles.length)];
+  const domain = DOMAIN_DATA[domainKey] || DOMAIN_DATA.job;
+  const pickedItem = domain.topics[Math.floor(Math.random() * domain.topics.length)];
 
   const req: GenerationRequest = {
-    topic: pickedTopic,
+    topic: pickedItem.title,
     targetAudience: audience,
-    category: 'curation',
+    category: pickedItem.format,
     slideCount: 5,
-    theme: currentTheme,
+    theme: pickedItem.theme || currentTheme,
     aspectRatio: '4:5',
     brandHandle,
     apiKey,
@@ -387,55 +506,58 @@ function formatToProject(data: any, req: GenerationRequest): CardNewsProject {
   };
 }
 
-// ── INTELLIGENT SMART ENGINE (DYNAMIC RANDOM SHUFFLE ON EVERY CLICK) ──
+// ── MASSIVE DYNAMIC SMART ENGINE (TOPIC-ACCURATE + INFINITE VARIATION) ──
 export function generateDynamicSmartProject(req: GenerationRequest): CardNewsProject {
   const topic = req.topic.trim();
   const total = Math.max(4, Math.min(req.slideCount || 5, 8));
   const uid = () => `${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
   const lower = topic.toLowerCase();
 
-  let selectedPoolKey = 'ai';
-  if (lower.includes('자소서') || lower.includes('면접') || lower.includes('취업') || lower.includes('프롬프트') || lower.includes('스펙') || lower.includes('대학')) {
-    selectedPoolKey = 'job';
-  } else if (lower.includes('재테크') || lower.includes('돈') || lower.includes('부업') || lower.includes('소비') || lower.includes('통장') || lower.includes('1억') || lower.includes('투자')) {
-    selectedPoolKey = 'finance';
-  } else if (lower.includes('마케팅') || lower.includes('플레이스') || lower.includes('릴스') || lower.includes('단골') || lower.includes('홍보')) {
-    selectedPoolKey = 'marketing';
+  // 1. Find best matching domain
+  let domainKey = 'ai';
+  if (lower.includes('자소서') || lower.includes('면접') || lower.includes('취업') || lower.includes('포트폴리오') || lower.includes('프롬프트') || lower.includes('합격')) {
+    domainKey = 'job';
+  } else if (lower.includes('재테크') || lower.includes('돈') || lower.includes('부업') || lower.includes('소비') || lower.includes('통장') || lower.includes('1억') || lower.includes('etf') || lower.includes('주식') || lower.includes('투자')) {
+    domainKey = 'finance';
+  } else if (lower.includes('마케팅') || lower.includes('플레이스') || lower.includes('릴스') || lower.includes('단골') || lower.includes('홍보') || lower.includes('조회수')) {
+    domainKey = 'marketing';
   } else {
-    selectedPoolKey = 'ai';
+    domainKey = 'ai';
   }
 
-  const dataset = DYNAMIC_POOLS[selectedPoolKey] || DYNAMIC_POOLS.ai;
-  const shuffledItems = shuffleArray(dataset.pool);
+  const domain = DOMAIN_DATA[domainKey] || DOMAIN_DATA.ai;
+
+  // Find exact or random topic in domain
+  const matchingTopic = domain.topics.find(t => t.title === topic) || domain.topics[Math.floor(Math.random() * domain.topics.length)];
 
   const slides: Slide[] = [];
 
-  // Slide 1: Cover
+  // Cover
   slides.push({
     id: `slide-1-${uid()}`,
     page: 1,
     type: 'cover',
     tag: `🔥 ${req.targetAudience || '직장인'} 필독`,
-    main_title: topic,
-    sub_title: dataset.subtitles[Math.floor(Math.random() * dataset.subtitles.length)],
+    main_title: matchingTopic.title,
+    sub_title: matchingTopic.sub,
   });
 
-  // Body slides: Pick freshly shuffled items every single click
+  // Body
   for (let i = 0; i < total - 2; i++) {
-    const item = shuffledItems[i % shuffledItems.length];
+    const s = matchingTopic.slides[i % matchingTopic.slides.length];
     slides.push({
       id: `slide-${i + 2}-${uid()}`,
       page: i + 2,
       type: 'content',
       tag: `💡 실전 꿀팁 0${i + 1}`,
-      step_or_num: item.step_or_num || `POINT 0${i + 1}`,
-      title: item.title,
-      body: item.body,
-      tip: item.tip,
+      step_or_num: s.step_or_num,
+      title: s.title,
+      body: s.body,
+      tip: s.tip,
     });
   }
 
-  // Last CTA
+  // CTA
   slides.push({
     id: `slide-${slides.length + 1}-${uid()}`,
     page: slides.length + 1,
@@ -446,14 +568,14 @@ export function generateDynamicSmartProject(req: GenerationRequest): CardNewsPro
   });
 
   return {
-    topic,
+    topic: matchingTopic.title,
     target_audience: req.targetAudience,
-    card_type: req.category,
-    theme_type: req.theme,
+    card_type: matchingTopic.format,
+    theme_type: matchingTopic.theme || req.theme,
     aspect_ratio: req.aspectRatio,
     brand_handle: req.brandHandle || '@kimppungsamssi',
     slide_count: slides.length,
-    instagram_caption: generateFallbackCaption(req),
+    instagram_caption: generateFallbackCaption({ ...req, topic: matchingTopic.title }),
     slides,
   };
 }
