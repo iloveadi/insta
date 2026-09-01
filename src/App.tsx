@@ -5,7 +5,12 @@ import type {
 } from './types/cardnews';
 import { THEME_PRESETS, VIRAL_QUICK_CATEGORIES } from './constants/themes';
 import type { ViralQuickCategory } from './constants/themes';
-import { generateCardNews, generateDynamicSmartProject, generateViralByQuickCategory } from './services/geminiService';
+import { 
+  generateCardNews, 
+  generateDynamicSmartProject, 
+  generateViralByQuickCategory,
+  generateByTargetAudience
+} from './services/geminiService';
 import { exportSlideToPng, exportAllSlidesToZip } from './services/exportService';
 
 import { Header } from './components/Header';
@@ -74,7 +79,7 @@ export function App() {
     localStorage.setItem('instacard_gemini_key', key);
   };
 
-  // Standard Generate Button
+  // Standard Dynamic Generate Button (Generates fresh new variation every click)
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
@@ -93,6 +98,40 @@ export function App() {
     } catch (err: any) {
       console.error('Generation error:', err);
       alert('카드뉴스 생성 중 문제가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // ── ONE-CLICK TARGET AUDIENCE GENERATION ──
+  const handleSelectAudience = async (audience: string) => {
+    setIsGenerating(true);
+    try {
+      const result = await generateByTargetAudience(
+        audience,
+        formData.theme,
+        formData.brandHandle || '@kimppungsamssi',
+        apiKey.trim()
+      );
+
+      setFormData(prev => ({
+        ...prev,
+        targetAudience: audience,
+        topic: result.resolvedTopic,
+        category: result.resolvedCategory,
+        theme: result.resolvedTheme,
+      }));
+
+      setProject(result.project);
+      setActiveSlideIndex(0);
+
+      confetti({
+        particleCount: 55,
+        spread: 75,
+        origin: { y: 0.55 },
+      });
+    } catch (err) {
+      console.error('Audience generation error:', err);
     } finally {
       setIsGenerating(false);
     }
@@ -216,7 +255,7 @@ export function App() {
               </span>
             </h2>
             <p className="text-xs text-slate-400">
-              주제 선택 또는 입력 시 4:5 카드뉴스와 인스타 캡션이 즉시 완성됩니다.
+              타깃 독자나 카테고리를 클릭하면 AI가 3초 만에 새로운 주제와 고화질 슬라이드를 완성합니다.
             </p>
           </div>
 
@@ -258,6 +297,7 @@ export function App() {
                 onGenerate={handleGenerate}
                 onSelectQuickCategory={handleQuickCategorySelect}
                 onSelectRandomCategory={handleRandomCategorySelect}
+                onSelectAudience={handleSelectAudience}
                 isGenerating={isGenerating}
               />
             </div>

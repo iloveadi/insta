@@ -28,6 +28,7 @@ interface InputPanelProps {
   onGenerate: () => void;
   onSelectQuickCategory: (cat: ViralQuickCategory) => void;
   onSelectRandomCategory: () => void;
+  onSelectAudience: (audience: string) => void;
   isGenerating: boolean;
 }
 
@@ -37,6 +38,7 @@ export const InputPanel: React.FC<InputPanelProps> = ({
   onGenerate,
   onSelectQuickCategory,
   onSelectRandomCategory,
+  onSelectAudience,
   isGenerating,
 }) => {
   const getCategoryIcon = (cat: CardNewsCategory) => {
@@ -63,12 +65,12 @@ export const InputPanel: React.FC<InputPanelProps> = ({
             {isGenerating ? (
               <>
                 <Loader2 className="w-6 h-6 animate-spin" />
-                <span>AI가 4:5 카드뉴스 제작 중...</span>
+                <span>AI가 새로운 내용으로 생성 중...</span>
               </>
             ) : (
               <>
                 <Sparkles className="w-6 h-6 animate-bounce text-amber-300 fill-amber-300" />
-                <span>AI 카드뉴스 생성하기</span>
+                <span>AI 카드뉴스 새로 생성하기 ⚡</span>
               </>
             )}
           </div>
@@ -77,12 +79,41 @@ export const InputPanel: React.FC<InputPanelProps> = ({
         </button>
       </div>
 
-      {/* ── 2. QUICK VIRAL ONE-CLICK SELECTOR ── */}
-      <div className="space-y-2.5 pb-4 border-b border-slate-800/80">
+      {/* ── 2. TARGET AUDIENCE (ONE-CLICK AUTO-GENERATE) ── */}
+      <div className="space-y-2.5 p-3.5 rounded-2xl bg-pink-950/20 border border-pink-500/20 shadow-sm">
+        <div className="flex items-center justify-between">
+          <label className="flex items-center space-x-1.5 text-xs font-black text-pink-300">
+            <Users className="w-3.5 h-3.5" />
+            <span>타깃 독자별 원클릭 맞춤 자동 생성</span>
+          </label>
+          <span className="text-[10px] text-pink-400 font-semibold">클릭 즉시 맞춤 기획</span>
+        </div>
+
+        <div className="flex flex-wrap gap-1.5">
+          {DEFAULT_AUDIENCES.map((audience) => (
+            <button
+              key={audience}
+              type="button"
+              disabled={isGenerating}
+              onClick={() => onSelectAudience(audience)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer disabled:opacity-50 ${
+                formData.targetAudience === audience
+                  ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white border-transparent shadow-md shadow-pink-500/30 scale-105 ring-2 ring-pink-400/40'
+                  : 'bg-slate-900/90 border-slate-800 text-slate-300 hover:text-white hover:border-pink-500/50 hover:bg-slate-800'
+              }`}
+            >
+              {audience}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── 3. QUICK VIRAL ONE-CLICK CATEGORY SELECTOR ── */}
+      <div className="space-y-2.5 pb-3 border-b border-slate-800/80">
         <div className="flex items-center justify-between">
           <label className="flex items-center space-x-1.5 text-xs font-black text-amber-300">
             <Zap className="w-3.5 h-3.5 fill-amber-300" />
-            <span>원클릭 주제 자동 완성</span>
+            <span>분야별 원클릭 주제 발굴</span>
           </label>
           <button
             type="button"
@@ -111,14 +142,14 @@ export const InputPanel: React.FC<InputPanelProps> = ({
         </div>
       </div>
 
-      {/* ── 3. TOPIC & KEYWORDS ── */}
+      {/* ── 4. TOPIC & KEYWORDS ── */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <label className="flex items-center space-x-2 text-sm font-bold text-slate-200">
             <span className="w-2 h-2 rounded-full bg-indigo-500" />
             <span>카드뉴스 주제 / 키워드</span>
           </label>
-          <span className="text-[11px] text-slate-400">직접 입력</span>
+          <span className="text-[11px] text-slate-400">직접 입력 가능</span>
         </div>
 
         <div className="relative">
@@ -132,36 +163,11 @@ export const InputPanel: React.FC<InputPanelProps> = ({
         </div>
       </div>
 
-      {/* ── 4. TARGET AUDIENCE ── */}
-      <div className="space-y-2">
-        <label className="flex items-center space-x-2 text-sm font-bold text-slate-200">
-          <Users className="w-4 h-4 text-pink-400" />
-          <span>타깃 독자</span>
-        </label>
-
-        <div className="flex flex-wrap gap-1.5">
-          {DEFAULT_AUDIENCES.map((audience) => (
-            <button
-              key={audience}
-              type="button"
-              onClick={() => setFormData(prev => ({ ...prev, targetAudience: audience }))}
-              className={`px-3 py-1 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
-                formData.targetAudience === audience
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent shadow-md shadow-indigo-500/30'
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-              }`}
-            >
-              {audience}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* ── 5. CARD NEWS TYPE (5 KINDS) ── */}
       <div className="space-y-2">
         <label className="flex items-center space-x-2 text-sm font-bold text-slate-200">
           <Layers className="w-4 h-4 text-amber-400" />
-          <span>카드뉴스 기획 포맷</span>
+          <span>기획 포맷 (5종)</span>
         </label>
 
         <div className="grid grid-cols-2 gap-2">
