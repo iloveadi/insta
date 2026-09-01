@@ -241,6 +241,15 @@ export async function generateByTargetAudience(
     apiKey,
   };
 
+  const project = await generateCardNews(req);
+  return {
+    project,
+    resolvedTopic: project.topic,
+    resolvedCategory: project.card_type,
+    resolvedTheme: project.theme_type,
+  };
+}
+
 export async function generateViralByQuickCategory(
   category: ViralQuickCategory,
   theme: ThemePresetId = 'modern_dark',
