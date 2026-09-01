@@ -19,7 +19,7 @@ const SYSTEM_PROMPT = `당신은 100만 팔로워를 보유한 최상위 인스�
 
 반드시 정해진 JSON 스키마 형식만을 반환하세요.`;
 
-// Test API Key Validity (Supports both AQ... and AIzaSy... keys via REST API)
+// Test API Key Validity (with detailed error diagnostics)
 export async function testGeminiApiKey(apiKey: string): Promise<{ success: boolean; modelName?: string; error?: string }> {
   const cleanKey = apiKey.trim();
   if (!cleanKey) {
@@ -30,28 +30,36 @@ export async function testGeminiApiKey(apiKey: string): Promise<{ success: boole
 
   for (const model of models) {
     try {
+      // 1. Try via URL param
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(cleanKey)}`;
       const res = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-goog-api-key': cleanKey
+        },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: 'Ping test. Reply with "OK".' }] }]
+          contents: [{ parts: [{ text: 'Ping. Reply OK.' }] }]
         })
       });
 
       if (res.ok) {
         return { success: true, modelName: model };
       }
+
       const errJson = await res.json().catch(() => null);
       if (errJson?.error?.message) {
-        console.warn(`Gemini ${model} test error:`, errJson.error.message);
+        console.warn(`[Gemini Test ${model}] Response:`, errJson.error.message);
       }
     } catch (err: any) {
-      console.warn(`Fetch ${model} failed:`, err?.message);
+      console.warn(`[Gemini Test ${model}] Network error:`, err?.message);
     }
   }
 
-  return { success: false, error: '유효하지 않은 API 키이거나 권한이 없습니다. (키 복사 상태를 확인해주세요)' };
+  return { 
+    success: false, 
+    error: '구글 인증 실패: AI Studio 목록의 2번째 줄(Default Gemini Project)에 있는 복사 아이콘을 눌러서 키를 넣어보세요!' 
+  };
 }
 
 export async function generateCardNews(request: GenerationRequest): Promise<CardNewsProject> {
@@ -87,7 +95,10 @@ export async function generateCardNews(request: GenerationRequest): Promise<Card
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
         const res = await fetch(url, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey
+          },
           body: JSON.stringify({
             systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
             contents: [{ parts: [{ text: userPrompt }] }],
@@ -311,12 +322,6 @@ const DOMAIN_DATA: Record<string, DynamicDomain> = {
             title: '소비 통장 - 1주일 단위 체크카드 생활비 지급',
             body: '한 달 생활비를 한 번에 넣지 말고, 매주 월요일마다 15만원씩 쪼개어 소비를 통제하세요.',
             tip: '주 단위 예산이 남으면 주말에 나를 위한 소소한 보상으로 쓰세요.'
-          },
-          {
-            step_or_num: 'BANK 03',
-            title: '비상금 파킹통장 - 월급 3배 금액 항시 유지',
-            body: '경조사나 병원비 등 예상치 못한 지출로 적금을 깨지 않도록 하루만 넣어도 이자가 붙는 파킹통장에 보관하세요.',
-            tip: '토스, 카카오뱅크, 케이뱅크 파킹통장 금리를 비교해 활용하세요.'
           }
         ]
       }
@@ -341,12 +346,6 @@ const DOMAIN_DATA: Record<string, DynamicDomain> = {
             title: '숫자 대비 후킹 - "월 50만원 벌던 사람이 500만원 된 비결"',
             body: 'Before & After의 극명한 대비를 구체적인 수치로 보여주면 시청자는 궁금증을 참지 못하고 끝까지 시청합니다.',
             tip: '결과물 사진이나 인증 캡처를 첫 1초에 빠르게 보여주세요.'
-          },
-          {
-            step_or_num: 'HOOK 03',
-            title: '비밀 폭로 후킹 - "선배들이 절대 안 알려주는 00 치트키"',
-            body: '나만 모르고 있던 꿀팁이라는 느낌을 주어 스크롤을 멈추게 하고 저장 버튼을 누르게 만드세요.',
-            tip: '영상 마지막에 "더 많은 정보는 [저장]하고 캡션에서 확인하세요" CTA를 넣으세요.'
           }
         ]
       },
@@ -367,12 +366,6 @@ const DOMAIN_DATA: Record<string, DynamicDomain> = {
             title: '영수증 리뷰 유도 트리거 시스템',
             body: '"리뷰 써주세요"라고 부탁만 하지 말고, 테이블마다 QR 코드를 두고 "포토리뷰 시 시그니처 음료 무료"처럼 즉각적인 보상을 설계하세요.',
             tip: '키워드가 포함된 정성스러운 포토리뷰가 쌓일수록 플레이스 순위가 급등합니다.'
-          },
-          {
-            step_or_num: 'LOCAL 03',
-            title: '인스타그램 지역 태그 릴스로 반경 3km 타깃 노출',
-            body: '가게의 시그니처 메뉴 조리 과정이나 비하인드 스토리를 숏폼으로 올리고 위치 태그를 정확히 등록하세요.',
-            tip: '릴스 3초 안에 시각적 침샘을 자극하는 클로즈업 장면을 넣으세요.'
           }
         ]
       }
