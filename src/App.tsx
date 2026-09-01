@@ -79,8 +79,13 @@ export function App() {
     localStorage.setItem('instacard_gemini_key', key);
   };
 
-  // Standard Dynamic Generate Button (Generates fresh new variation every click)
+  // Standard Dynamic Generate Button (Strict Real-Time Gemini AI)
   const handleGenerate = async () => {
+    if (!apiKey.trim()) {
+      setIsSettingsOpen(true);
+      return;
+    }
+
     setIsGenerating(true);
     try {
       const generated = await generateCardNews({
@@ -103,7 +108,8 @@ export function App() {
       });
     } catch (err: any) {
       console.error('Generation error:', err);
-      alert('카드뉴스 생성 중 문제가 발생했습니다. 다시 시도해주세요.');
+      alert(`AI 생성 실패: ${err.message || 'API 키를 확인해주세요.'}`);
+      setIsSettingsOpen(true);
     } finally {
       setIsGenerating(false);
     }
@@ -111,15 +117,20 @@ export function App() {
 
   // ── ONE-CLICK TARGET AUDIENCE GENERATION ──
   const handleSelectAudience = async (audience: string) => {
+    if (!apiKey.trim()) {
+      setIsSettingsOpen(true);
+      return;
+    }
+
     setIsGenerating(true);
     try {
       const result = await generateByTargetAudience(
         audience,
         formData.theme,
-        formData.brandHandle || '@kimppungsamssi',
+        formData.brandHandle,
         apiKey.trim()
       );
-
+      setProject(result.project);
       setFormData(prev => ({
         ...prev,
         targetAudience: audience,
@@ -127,17 +138,16 @@ export function App() {
         category: result.resolvedCategory,
         theme: result.resolvedTheme,
       }));
-
-      setProject(result.project);
       setActiveSlideIndex(0);
-
       confetti({
-        particleCount: 55,
-        spread: 75,
-        origin: { y: 0.55 },
+        particleCount: 40,
+        spread: 60,
+        origin: { y: 0.7 },
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error('Audience generation error:', err);
+      alert(`AI 생성 실패: ${err.message || 'API 키를 확인해주세요.'}`);
+      setIsSettingsOpen(true);
     } finally {
       setIsGenerating(false);
     }
