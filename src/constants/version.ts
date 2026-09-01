@@ -6,13 +6,13 @@ export interface VersionInfo {
 }
 
 export const APP_VERSION: VersionInfo = {
-  version: '1.2.2',
-  codename: 'Gemini-1.5-Flash-Standard',
+  version: '1.2.3',
+  codename: 'Gemini-2.5-Flash-Standard',
   releaseDate: '2026-09-02',
   highlights: [
-    'Google Gemini 공식 gemini-1.5-flash 표준 엔드포인트 단일화',
-    'API 키 복사 시 앞뒤 공백 자동 trim 처리 필수 적용',
-    '키 유효성 테스트 시 초경량 ping 페이로드 호출 및 상세 콘솔 에러 로깅 보강',
-    '100% 실시간 Google Gemini API 생성 파이프라인 정립'
+    '최신 Google Gemini 2.5 Flash (gemini-2.5-flash) 표준 엔드포인트 전면 교체',
+    'gemini-2.0-flash 자동 폴백 안전망 구축',
+    'API 키 복사 시 모든 공백 및 개행 정규식(/\\s+/g) 자동 제거',
+    'Ping 테스트 함수 최신 표준 규격으로 전면 재작성'
   ]
 };
