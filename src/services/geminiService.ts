@@ -1,8 +1,7 @@
 import type { CardNewsProject, GenerationRequest, Slide, SlideType, CardNewsCategory, ThemePresetId, AspectRatio } from '../types/cardnews';
 import type { ViralQuickCategory } from '../constants/themes';
 
-const OFFICIAL_MODEL = 'gemini-2.5-flash';
-const FALLBACK_MODEL = 'gemini-2.0-flash';
+const OFFICIAL_MODEL = 'gemini-3.6-flash';
 
 const SYSTEM_PROMPT = `당신은 100만 팔로워를 보유한 최상위 인스타그램 카드뉴스 전문 크리에이터이자 카피라이터입니다.
 사용자가 제공하는 [주제], [타깃 독자], [카드뉴스 유형], [슬라이드 수]에 맞춰 인스타그램 피드에서 스와이프를 유발하고 저장/공유율을 극대화하는 카드뉴스를 기획하세요.
@@ -22,63 +21,59 @@ const SYSTEM_PROMPT = `당신은 100만 팔로워를 보유한 최상위 인스�
 
 반드시 정해진 JSON 스키마 형식만을 반환하세요.`;
 
-// ── 1. API KEY VALIDITY TEST (Gemini 2.5 Flash / 2.0 Flash) ──
+// ── 1. API KEY VALIDITY TEST (Official gemini-3.6-flash) ──
 export async function testGeminiApiKey(rawKey: string): Promise<{ success: boolean; modelName?: string; error?: string }> {
   const apiKey = (rawKey || '').replace(/\s+/g, '');
   if (!apiKey) {
     return { success: false, error: 'API 키가 입력되지 않았습니다.' };
   }
 
-  const modelsToTry = [OFFICIAL_MODEL, FALLBACK_MODEL];
-  let lastError = '';
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${OFFICIAL_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
-  for (const model of modelsToTry) {
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [{ text: 'Hello' }],
+          },
+        ],
+      }),
+    });
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: 'Hello' }],
-            },
-          ],
-        }),
-      });
-
-      if (response.ok) {
-        console.log(`[Gemini Test Success] Model: ${model}, Status: ${response.status}`);
-        return { success: true, modelName: model };
-      }
-
-      const errorData = await response.json().catch(() => ({}));
-      const message = errorData.error?.message || `HTTP ${response.status} 오류`;
-      lastError = `[Status ${response.status}] ${message}`;
-      console.warn(`[Gemini Test ${model} Failed]:`, lastError);
-    } catch (err: any) {
-      lastError = `네트워크 오류: ${err?.message || '통신 실패'}`;
+    if (response.ok) {
+      console.log(`[Gemini Test Success] Model: ${OFFICIAL_MODEL}, Status: ${response.status}`);
+      return { success: true, modelName: OFFICIAL_MODEL };
     }
-  }
 
-  return {
-    success: false,
-    error: lastError,
-  };
+    const errorData = await response.json().catch(() => ({}));
+    const message = errorData.error?.message || `HTTP ${response.status} 오류`;
+    const lastError = `[Status ${response.status}] ${message}`;
+    console.error(`[Gemini Test ${OFFICIAL_MODEL} Failed]:`, lastError);
+
+    return {
+      success: false,
+      error: lastError,
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      error: `네트워크 오류: ${err?.message || '통신 실패'}`,
+    };
+  }
 }
 
-// ── 2. REAL-TIME CARD NEWS GENERATION (Gemini 2.5 Flash) ──
+// ── 2. REAL-TIME CARD NEWS GENERATION (Official gemini-3.6-flash) ──
 export async function generateCardNews(request: GenerationRequest): Promise<CardNewsProject> {
   const rawKey = (request.apiKey || (import.meta.env.VITE_GEMINI_API_KEY as string) || '').replace(/\s+/g, '');
 
   if (!rawKey) {
     throw new Error('API_KEY_REQUIRED');
   }
-
-  const modelsToTry = [OFFICIAL_MODEL, FALLBACK_MODEL];
 
   const userPrompt = `
 [카드뉴스 생성 요청]
@@ -132,63 +127,53 @@ export async function generateCardNews(request: GenerationRequest): Promise<Card
   "instagram_caption": "..."
 }`;
 
-  let lastError = '';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${OFFICIAL_MODEL}:generateContent?key=${encodeURIComponent(rawKey)}`;
 
-  for (const model of modelsToTry) {
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(rawKey)}`;
-
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      systemInstruction: {
+        parts: [{ text: SYSTEM_PROMPT }],
+      },
+      contents: [
+        {
+          parts: [{ text: userPrompt }],
         },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: SYSTEM_PROMPT }],
-          },
-          contents: [
-            {
-              parts: [{ text: userPrompt }],
-            },
-          ],
-          generationConfig: {
-            responseMimeType: 'application/json',
-            temperature: 0.95,
-          },
-        }),
-      });
+      ],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        temperature: 0.95,
+      },
+    }),
+  });
 
-      if (!res.ok) {
-        const errJson = await res.json().catch(() => null);
-        const errorMsg = errJson?.error?.message || `HTTP ${res.status}`;
-        lastError = `[Status ${res.status}] ${errorMsg}`;
-        console.error(`[Gemini Gen ${model} Failed]:`, lastError);
-        continue;
-      }
-
-      const data = await res.json();
-      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (!rawText) {
-        throw new Error('Google Gemini로부터 응답 텍스트를 받지 못했습니다.');
-      }
-
-      let parsed: any;
-      try {
-        parsed = JSON.parse(rawText);
-      } catch {
-        const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-        parsed = JSON.parse(cleaned);
-      }
-
-      return formatToProject(parsed, request);
-    } catch (err: any) {
-      lastError = err?.message || '통신 오류';
-    }
+  if (!res.ok) {
+    const errJson = await res.json().catch(() => null);
+    const errorMsg = errJson?.error?.message || `HTTP ${res.status}`;
+    const lastError = `[Status ${res.status}] ${errorMsg}`;
+    console.error(`[Gemini Gen ${OFFICIAL_MODEL} Failed]:`, lastError);
+    throw new Error(`Google API 호출 실패: ${lastError}`);
   }
 
-  throw new Error(`Google API 호출 실패: ${lastError}`);
+  const data = await res.json();
+  const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+  if (!rawText) {
+    throw new Error('Google Gemini로부터 응답 텍스트를 받지 못했습니다.');
+  }
+
+  let parsed: any;
+  try {
+    parsed = JSON.parse(rawText);
+  } catch {
+    const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    parsed = JSON.parse(cleaned);
+  }
+
+  return formatToProject(parsed, request);
 }
 
 function formatToProject(data: any, req: GenerationRequest): CardNewsProject {
