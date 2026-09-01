@@ -17,14 +17,23 @@ export const Header: React.FC<HeaderProps> = ({
   isExporting,
   slideCount,
 }) => {
+  const handleReload = () => {
+    window.location.reload();
+  };
+
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl select-none">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Brand Logo & Version Badge */}
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-0.5 shadow-lg shadow-indigo-500/30 flex items-center justify-center">
+        {/* Clickable Brand Logo & Title (Refreshes Page) */}
+        <button
+          type="button"
+          onClick={handleReload}
+          title="클릭하여 처음 상태로 새로고침"
+          className="flex items-center space-x-3 text-left hover:opacity-85 active:scale-[0.98] transition-all cursor-pointer group"
+        >
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-0.5 shadow-lg shadow-indigo-500/30 flex items-center justify-center group-hover:rotate-6 transition-transform">
             <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-              <Camera className="w-5 h-5 text-pink-400" />
+              <Camera className="w-5 h-5 text-pink-400 group-hover:scale-110 transition-transform" />
             </div>
           </div>
           <div>
@@ -41,14 +50,14 @@ export const Header: React.FC<HeaderProps> = ({
               인스타그램 카드뉴스 자동 기획 & 고화질 생성기
             </p>
           </div>
-        </div>
+        </button>
 
         {/* Action Controls */}
         <div className="flex items-center space-x-2 sm:space-x-3">
           {/* API Key Status / Settings */}
           <button
             onClick={onOpenSettings}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
               hasApiKey
                 ? 'bg-emerald-950/40 text-emerald-300 border-emerald-500/40 hover:bg-emerald-900/40'
                 : 'bg-amber-950/30 text-amber-300 border-amber-500/30 hover:bg-amber-900/40'
