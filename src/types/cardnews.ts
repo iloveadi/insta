@@ -47,6 +47,8 @@ export interface Slide {
   title?: string;
   body?: string;
   tip?: string;
+  image_url?: string;
+  image_keyword?: string;
   // Extended types
   items?: string[];
   left_label?: string;
@@ -75,5 +77,6 @@ export interface GenerationRequest {
   theme: ThemePresetId;
   aspectRatio: AspectRatio;
   brandHandle: string;
+  includeImages?: boolean;
   apiKey?: string;
 }

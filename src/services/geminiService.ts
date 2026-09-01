@@ -14,15 +14,81 @@ const SYSTEM_PROMPT = `당신은 100만 팔로워를 보유한 최상위 인스�
      * 소제목(title): 명확하고 매력적인 핵심 소제목 (예: '01. Claude 3.7 - 코딩 & 긴 글 분석 1위')
      * 본문(body): 모바일 가독성에 맞춘 2~3줄의 알찬 실전 요약 설명
      * PRO TIP(tip): 바로 써먹을 수 있는 단 1줄의 실천 팁/단축키/활용법
+     * image_keyword: 슬라이드 분위기에 어울리는 영어 검색 키워드 (예: 'artificial-intelligence', 'workspace', 'finance', 'meditation')
    - CTA (마지막): '저장해두고 필요할 때 꺼내보기' 등 저장/공유 유도.
 4. 인스타그램 캡션 (instagram_caption): 본문 핵심 요약 + 저장 유도 + 추천 해시태그 10~15개를 포함하여 이모지와 함께 작성.
 
 반드시 정해진 JSON 스키마 형식만을 반환하세요.`;
 
+// Curated high-res aesthetic Unsplash CDN images mapped by topic domain
+const CURATED_IMAGE_POOLS: Record<string, string[]> = {
+  ai: [
+    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1080&q=80', // Abstract futuristic 3D
+    'https://images.unsplash.com/photo-1677442136019-21780efad99a?auto=format&fit=crop&w=1080&q=80', // AI Tech
+    'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1080&q=80', // Code Matrix
+    'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1080&q=80', // Cyber Glow
+    'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1080&q=80', // Mac workspace
+  ],
+  finance: [
+    'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1080&q=80', // Stock chart neon
+    'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1080&q=80', // Coins & Growth
+    'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=1080&q=80', // Modern cards
+    'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1080&q=80', // Analytics graph
+    'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=1080&q=80', // Currency dark
+  ],
+  routine: [
+    'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1080&q=80', // Morning sunrise meditation
+    'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=1080&q=80', // Coffee & Journal
+    'https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?auto=format&fit=crop&w=1080&q=80', // Book & Notes
+    'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=1080&q=80', // Deep study
+    'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=1080&q=80', // Minimal desk
+  ],
+  marketing: [
+    'https://images.unsplash.com/photo-1533750516457-a7f992034fec?auto=format&fit=crop&w=1080&q=80', // Digital Marketing
+    'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=1080&q=80', // Social feed
+    'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1080&q=80', // Creative board
+    'https://images.unsplash.com/photo-1542744094-3a31f272c490?auto=format&fit=crop&w=1080&q=80', // Strategy meeting
+    'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1080&q=80', // Presentation
+  ],
+  health: [
+    'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=1080&q=80', // Fitness & Lifestyle
+    'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1080&q=80', // Healthy salad & water
+    'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&w=1080&q=80', // Cozy bed sleep
+    'https://images.unsplash.com/photo-1512438248247-f0f2a5a8b7f0?auto=format&fit=crop&w=1080&q=80', // Morning sunlight
+    'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1080&q=80', // Calm breathing
+  ],
+  general: [
+    'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1080&q=80', // Global Earth Night
+    'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1080&q=80', // Tech collaboration
+    'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=1080&q=80', // Strategy
+    'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1080&q=80', // Architecture
+    'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1080&q=80', // Creative studio
+  ],
+};
+
+function getTopicPool(topic: string): string[] {
+  const lower = topic.toLowerCase();
+  if (lower.includes('ai') || lower.includes('인공지능') || lower.includes('도구') || lower.includes('툴') || lower.includes('생산성')) {
+    return CURATED_IMAGE_POOLS.ai;
+  }
+  if (lower.includes('재테크') || lower.includes('돈') || lower.includes('부업') || lower.includes('1억') || lower.includes('소비') || lower.includes('통장')) {
+    return CURATED_IMAGE_POOLS.finance;
+  }
+  if (lower.includes('루틴') || lower.includes('자기계발') || lower.includes('동기부여') || lower.includes('습관') || lower.includes('멘탈')) {
+    return CURATED_IMAGE_POOLS.routine;
+  }
+  if (lower.includes('마케팅') || lower.includes('릴스') || lower.includes('인스타') || lower.includes('브랜딩') || lower.includes('조회수')) {
+    return CURATED_IMAGE_POOLS.marketing;
+  }
+  if (lower.includes('수면') || lower.includes('건강') || lower.includes('다이어트') || lower.includes('운동') || lower.includes('식단')) {
+    return CURATED_IMAGE_POOLS.health;
+  }
+  return CURATED_IMAGE_POOLS.general;
+}
+
 export async function generateCardNews(request: GenerationRequest): Promise<CardNewsProject> {
   const apiKey = request.apiKey || (import.meta.env.VITE_GEMINI_API_KEY as string) || (import.meta.env.NEXT_PUBLIC_GEMINI_API_KEY as string);
 
-  // If no API key provided, use our smart dynamic AI engine
   if (!apiKey || apiKey.trim() === '') {
     return generateDynamicSmartProject(request);
   }
@@ -63,7 +129,6 @@ JSON 형식으로 반환하세요.`;
   }
 }
 
-// ── ONE-CLICK VIRAL CATEGORY GENERATION ──
 export async function generateViralByQuickCategory(
   category: ViralQuickCategory,
   theme: ThemePresetId = 'modern_dark',
@@ -102,7 +167,7 @@ export async function generateViralByQuickCategory(
 사용자가 선택한 카테고리는 "${category.name}" (${category.target})이다.
 1. 이 카테고리에서 최근 가장 조회수/저장수가 높고 사람들이 흥미로워할 구체적인 주제 하나를 스스로 기획하라.
 2. 가장 적합한 카드뉴스 포맷(curation: 큐레이션, howto: 실전가이드, checklist: 체크리스트, myth_fact: 통념깨기 중 1개)을 자동 선정하라.
-3. 총 5장의 슬라이드(표지 1장 + 본문 3장 + CTA 1장)와 인스타그램 본문 캡션을 작성하라. (절대 일반론이 아닌 구체적인 실명, 실제 수치, 확실한 꿀팁 포함)
+3. 총 5장의 슬라이드(표지 1장 + 본문 3장 + CTA 1장)와 인스타그램 본문 캡션을 작성하라. (구체적 실명, 실제 수치, 꿀팁 포함)
 
 반드시 JSON 포맷으로 "topic", "category", "instagram_caption", "slides" 를 포함하여 반환하라.`;
 
@@ -164,6 +229,7 @@ export async function generateViralByQuickCategory(
 }
 
 function formatToProject(data: any, req: GenerationRequest): CardNewsProject {
+  const pool = getTopicPool(req.topic);
   const slides: Slide[] = (data.slides || []).map((slide: any, idx: number) => ({
     id: `slide-${idx + 1}-${Date.now()}`,
     page: slide.page || idx + 1,
@@ -175,6 +241,7 @@ function formatToProject(data: any, req: GenerationRequest): CardNewsProject {
     title: slide.title || slide.main_title,
     body: slide.body,
     tip: slide.tip,
+    image_url: pool[idx % pool.length],
     items: slide.items,
     left_label: slide.left_label,
     left_content: slide.left_content,
@@ -195,12 +262,11 @@ function formatToProject(data: any, req: GenerationRequest): CardNewsProject {
   };
 }
 
-// ── DYNAMIC CONTEXT-AWARE SMART GENERATOR ──
-// Accurately crafts concrete, realistic, topic-aligned contents for any query
 export function generateDynamicSmartProject(req: GenerationRequest): CardNewsProject {
   const topic = req.topic.trim();
   const total = Math.max(4, Math.min(req.slideCount || 5, 8));
   const slides: Slide[] = [];
+  const pool = getTopicPool(topic);
 
   // 1. Cover Slide
   slides.push({
@@ -210,9 +276,9 @@ export function generateDynamicSmartProject(req: GenerationRequest): CardNewsPro
     tag: `🔥 ${req.targetAudience || '직장인'} 필독`,
     main_title: topic || '2026년 일잘러가 몰래 쓰는 무료 AI 도구 5선',
     sub_title: `지금 바로 적용 가능한 실전 핵심 꿀팁 총정리`,
+    image_url: pool[0],
   });
 
-  // Topic Keyword Matching for 100% concrete, authentic card news
   const lower = topic.toLowerCase();
 
   // A. AI & Productivity Tools
@@ -254,6 +320,7 @@ export function generateDynamicSmartProject(req: GenerationRequest): CardNewsPro
         title: tool.title,
         body: tool.body,
         tip: tool.tip,
+        image_url: pool[(i + 1) % pool.length],
       });
     }
   }
@@ -296,6 +363,7 @@ export function generateDynamicSmartProject(req: GenerationRequest): CardNewsPro
         title: p.title,
         body: p.body,
         tip: p.tip,
+        image_url: pool[(i + 1) % pool.length],
       });
     }
   }
@@ -338,6 +406,7 @@ export function generateDynamicSmartProject(req: GenerationRequest): CardNewsPro
         title: p.title,
         body: p.body,
         tip: p.tip,
+        image_url: pool[(i + 1) % pool.length],
       });
     }
   }
@@ -380,6 +449,7 @@ export function generateDynamicSmartProject(req: GenerationRequest): CardNewsPro
         title: p.title,
         body: p.body,
         tip: p.tip,
+        image_url: pool[(i + 1) % pool.length],
       });
     }
   }
@@ -422,10 +492,11 @@ export function generateDynamicSmartProject(req: GenerationRequest): CardNewsPro
         title: p.title,
         body: p.body,
         tip: p.tip,
+        image_url: pool[(i + 1) % pool.length],
       });
     }
   }
-  // General Fallback with highly concrete items
+  // General Fallback
   else {
     const generalPoints = [
       {
@@ -458,6 +529,7 @@ export function generateDynamicSmartProject(req: GenerationRequest): CardNewsPro
         title: p.title,
         body: p.body,
         tip: p.tip,
+        image_url: pool[(i + 1) % pool.length],
       });
     }
   }
@@ -470,6 +542,7 @@ export function generateDynamicSmartProject(req: GenerationRequest): CardNewsPro
     tag: 'SAVE & SHARE',
     main_title: '나중에 다시 찾아보려면?',
     sub_title: '지금 오른쪽 아래 [저장]을 누르고, 유익했다면 동료에게 [공유]해보세요! ✨',
+    image_url: pool[pool.length - 1],
   });
 
   return {
