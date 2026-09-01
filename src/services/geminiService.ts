@@ -1,4 +1,3 @@
-import { GoogleGenAI } from '@google/genai';
 import type { CardNewsProject, GenerationRequest, Slide, SlideType, CardNewsCategory, ThemePresetId, AspectRatio } from '../types/cardnews';
 import type { ViralQuickCategory } from '../constants/themes';
 
@@ -20,39 +19,47 @@ const SYSTEM_PROMPT = `당신은 100만 팔로워를 보유한 최상위 인스�
 
 반드시 정해진 JSON 스키마 형식만을 반환하세요.`;
 
-// Test API Key Validity
+// Test API Key Validity (Supports both AQ... and AIzaSy... keys via REST API)
 export async function testGeminiApiKey(apiKey: string): Promise<{ success: boolean; modelName?: string; error?: string }> {
-  if (!apiKey || apiKey.trim() === '') {
+  const cleanKey = apiKey.trim();
+  if (!cleanKey) {
     return { success: false, error: 'API 키가 입력되지 않았습니다.' };
   }
 
-  const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
-  const ai = new GoogleGenAI({ apiKey: apiKey.trim() });
+  const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
 
-  for (const model of modelsToTry) {
+  for (const model of models) {
     try {
-      const response = await ai.models.generateContent({
-        model,
-        contents: 'Ping test. Reply with "OK".',
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(cleanKey)}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: 'Ping test. Reply with "OK".' }] }]
+        })
       });
-      if (response.text) {
+
+      if (res.ok) {
         return { success: true, modelName: model };
       }
+      const errJson = await res.json().catch(() => null);
+      if (errJson?.error?.message) {
+        console.warn(`Gemini ${model} test error:`, errJson.error.message);
+      }
     } catch (err: any) {
-      console.warn(`Model ${model} test failed:`, err?.message);
+      console.warn(`Fetch ${model} failed:`, err?.message);
     }
   }
 
-  return { success: false, error: '유효하지 않은 API 키이거나 구글 서버 응답이 없습니다.' };
+  return { success: false, error: '유효하지 않은 API 키이거나 권한이 없습니다. (키 복사 상태를 확인해주세요)' };
 }
 
 export async function generateCardNews(request: GenerationRequest): Promise<CardNewsProject> {
-  const apiKey = request.apiKey || (import.meta.env.VITE_GEMINI_API_KEY as string) || (import.meta.env.NEXT_PUBLIC_GEMINI_API_KEY as string);
+  const apiKey = (request.apiKey || (import.meta.env.VITE_GEMINI_API_KEY as string) || '').trim();
 
-  // If valid API key is available, attempt real-time Gemini generation
-  if (apiKey && apiKey.trim().startsWith('AIzaSy')) {
+  // If API key is available, call Gemini REST endpoint
+  if (apiKey) {
     const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
-    const ai = new GoogleGenAI({ apiKey: apiKey.trim() });
 
     const userPrompt = `
 [카드뉴스 생성 요청]
@@ -65,24 +72,39 @@ export async function generateCardNews(request: GenerationRequest): Promise<Card
 
 매번 누를 때마다 이전과 다른 신선한 앵글과 참신한 꿀팁/도구로 본문을 채워주세요.
 표지의 주제와 본문의 슬라이드 내용이 완벽하게 100% 일치해야 합니다.
-반드시 유효한 JSON 형식으로 반환하세요.`;
+반드시 아래 JSON 형식만 반환하세요:
+{
+  "slides": [
+    { "type": "cover", "tag": "🔥 2030 직장인 필독", "main_title": "...", "sub_title": "..." },
+    { "type": "content", "tag": "💡 실전 꿀팁 01", "step_or_num": "01", "title": "...", "body": "...", "tip": "..." },
+    { "type": "cta", "tag": "💾 SAVE & SHARE", "main_title": "...", "sub_title": "..." }
+  ],
+  "instagram_caption": "..."
+}`;
 
     for (const model of models) {
       try {
-        const response = await ai.models.generateContent({
-          model,
-          contents: userPrompt,
-          config: {
-            systemInstruction: SYSTEM_PROMPT,
-            responseMimeType: 'application/json',
-            temperature: 1.0,
-          },
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+            contents: [{ parts: [{ text: userPrompt }] }],
+            generationConfig: {
+              responseMimeType: 'application/json',
+              temperature: 1.0,
+            }
+          })
         });
 
-        const text = response.text;
-        if (text) {
-          const parsed = JSON.parse(text);
-          return formatToProject(parsed, request);
+        if (res.ok) {
+          const data = await res.json();
+          const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (rawText) {
+            const parsed = JSON.parse(rawText);
+            return formatToProject(parsed, request);
+          }
         }
       } catch (err: any) {
         console.warn(`Gemini API [${model}] failed:`, err?.message);
@@ -241,32 +263,6 @@ const DOMAIN_DATA: Record<string, DynamicDomain> = {
             tip: '"이 경험을 바탕으로 00 신사업에서 즉시 실전 성과를 내겠습니다."'
           }
         ]
-      },
-      {
-        title: '서류 광탈 막아주는 신입 포트폴리오 노션 구성 템플릿',
-        sub: '면접관이 끝까지 스크롤 내리는 포폴 작성법',
-        format: 'curation',
-        theme: 'clean_minimal',
-        slides: [
-          {
-            step_or_num: 'PAGE 01',
-            title: '프로젝트 개요 - 문제 정의(Problem) & 나의 역할',
-            body: '내가 어떤 문제를 발견했고 팀 내에서 어떤 롤(기여도 70%)을 맡았는지 명확히 명시하세요.',
-            tip: '기여도와 사용 툴(Figma, GA4 등)을 뱃지 형태로 상단에 배치하세요.'
-          },
-          {
-            step_or_num: 'PAGE 02',
-            title: '가설 검증 과정 & 문제 해결 솔루션(Action)',
-            body: '단순 결과 화면만 나열하지 말고, 어떤 고민 끝에 이 디자인/로직을 도출했는지 전후 과정을 보여주세요.',
-            tip: 'Before & After 비교 이미지를 나란히 배치하면 설득력이 3배 상승합니다.'
-          },
-          {
-            step_or_num: 'PAGE 03',
-            title: '정량적 성과 & 레슨 런(Lesson Learned)',
-            body: '"회원가입 전환율 18% 상승" 같은 숫자와, 이 프로젝트를 통해 무엇을 배웠는지 2줄 요약하세요.',
-            tip: '실패했던 점과 개선 방향을 솔직히 적을 때 메타인지가 높게 평가됩니다.'
-          }
-        ]
       }
     ]
   },
@@ -321,32 +317,6 @@ const DOMAIN_DATA: Record<string, DynamicDomain> = {
             title: '비상금 파킹통장 - 월급 3배 금액 항시 유지',
             body: '경조사나 병원비 등 예상치 못한 지출로 적금을 깨지 않도록 하루만 넣어도 이자가 붙는 파킹통장에 보관하세요.',
             tip: '토스, 카카오뱅크, 케이뱅크 파킹통장 금리를 비교해 활용하세요.'
-          }
-        ]
-      },
-      {
-        title: '초보 투자자가 평생 후회 안 하는 미국 배당 ETF 투자 로드맵',
-        sub: '잠자는 동안에도 달러가 꽂히는 복리 머니트리',
-        format: 'curation',
-        theme: 'neon_cyber',
-        slides: [
-          {
-            step_or_num: 'ETF 01',
-            title: 'SCHD - 미국 우량 배당성장 ETF (연 3~4% 배당 + 주가 상승)',
-            body: '10년 이상 배당을 꾸준히 늘려온 미국 대표 우량 기업 100개에 분산 투자하는 국민 배당 ETF입니다.',
-            tip: '받은 배당금은 쓰지 않고 그대로 재투자할 때 복리 마법이 시작됩니다.'
-          },
-          {
-            step_or_num: 'ETF 02',
-            title: 'VOO / SPY - 미국 500대 기업을 담는 S&P 500 지수 ETF',
-            body: '애플, 마이크로소프트, 엔비디아 등 세계 최고의 기업들에 매달 기계적으로 적립식 매수하세요.',
-            tip: '지난 50년간 연평균 수익률은 약 10%에 달합니다.'
-          },
-          {
-            step_or_num: 'ETF 03',
-            title: 'ISA 계좌 & 연금저축펀드로 세금 100% 아끼기',
-            body: '일반 계좌에서 매매하면 15.4% 배당소득세가 떼이지만, 절세 계좌를 활용하면 비과세 및 과세이연 혜택을 받습니다.',
-            tip: '사회초년생이라면 연말정산 세액공제 한도 900만원을 꼭 채우세요.'
           }
         ]
       }
