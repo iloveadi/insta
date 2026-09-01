@@ -50,13 +50,39 @@ export const InputPanel: React.FC<InputPanelProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      {/* ── 1. QUICK VIRAL ONE-CLICK SELECTOR ── */}
+    <div className="space-y-5">
+      {/* ── 1. TOP PROMINENT AI GENERATE BUTTON ── */}
+      <div>
+        <button
+          type="button"
+          onClick={onGenerate}
+          disabled={isGenerating || !formData.topic.trim()}
+          className="relative w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-black text-lg shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:opacity-95 active:scale-[0.99] transition-all disabled:opacity-50 disabled:pointer-events-none overflow-hidden group cursor-pointer"
+        >
+          <div className="relative z-10 flex items-center justify-center space-x-2.5">
+            {isGenerating ? (
+              <>
+                <Loader2 className="w-6 h-6 animate-spin" />
+                <span>AI가 4:5 카드뉴스 제작 중...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-6 h-6 animate-bounce text-amber-300 fill-amber-300" />
+                <span>AI 카드뉴스 생성하기</span>
+              </>
+            )}
+          </div>
+
+          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-1000" />
+        </button>
+      </div>
+
+      {/* ── 2. QUICK VIRAL ONE-CLICK SELECTOR ── */}
       <div className="space-y-2.5 pb-4 border-b border-slate-800/80">
         <div className="flex items-center justify-between">
           <label className="flex items-center space-x-1.5 text-xs font-black text-amber-300">
             <Zap className="w-3.5 h-3.5 fill-amber-300" />
-            <span>원클릭 AI 자동 완성 (주제 자동 발굴)</span>
+            <span>원클릭 주제 자동 완성</span>
           </label>
           <button
             type="button"
@@ -85,14 +111,14 @@ export const InputPanel: React.FC<InputPanelProps> = ({
         </div>
       </div>
 
-      {/* ── 2. TOPIC & KEYWORDS ── */}
-      <div className="space-y-2.5">
+      {/* ── 3. TOPIC & KEYWORDS ── */}
+      <div className="space-y-2">
         <div className="flex items-center justify-between">
           <label className="flex items-center space-x-2 text-sm font-bold text-slate-200">
             <span className="w-2 h-2 rounded-full bg-indigo-500" />
             <span>카드뉴스 주제 / 키워드</span>
           </label>
-          <span className="text-[11px] text-slate-400">자유롭게 입력 가능</span>
+          <span className="text-[11px] text-slate-400">직접 입력</span>
         </div>
 
         <div className="relative">
@@ -106,8 +132,8 @@ export const InputPanel: React.FC<InputPanelProps> = ({
         </div>
       </div>
 
-      {/* ── 3. TARGET AUDIENCE ── */}
-      <div className="space-y-2.5">
+      {/* ── 4. TARGET AUDIENCE ── */}
+      <div className="space-y-2">
         <label className="flex items-center space-x-2 text-sm font-bold text-slate-200">
           <Users className="w-4 h-4 text-pink-400" />
           <span>타깃 독자</span>
@@ -131,8 +157,8 @@ export const InputPanel: React.FC<InputPanelProps> = ({
         </div>
       </div>
 
-      {/* ── 4. CARD NEWS TYPE (5 KINDS) ── */}
-      <div className="space-y-2.5">
+      {/* ── 5. CARD NEWS TYPE (5 KINDS) ── */}
+      <div className="space-y-2">
         <label className="flex items-center space-x-2 text-sm font-bold text-slate-200">
           <Layers className="w-4 h-4 text-amber-400" />
           <span>카드뉴스 기획 포맷</span>
@@ -166,8 +192,8 @@ export const InputPanel: React.FC<InputPanelProps> = ({
         </div>
       </div>
 
-      {/* ── 5. DESIGN THEME PRESET ── */}
-      <div className="space-y-2.5">
+      {/* ── 6. DESIGN THEME PRESET ── */}
+      <div className="space-y-2">
         <label className="flex items-center space-x-2 text-sm font-bold text-slate-200">
           <Palette className="w-4 h-4 text-emerald-400" />
           <span>디자인 테마</span>
@@ -200,7 +226,7 @@ export const InputPanel: React.FC<InputPanelProps> = ({
         </div>
       </div>
 
-      {/* ── 6. BRAND HANDLE & 4:5 BADGE ── */}
+      {/* ── 7. BRAND HANDLE & 4:5 BADGE ── */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <label className="flex items-center space-x-1.5 text-xs font-bold text-slate-300">
@@ -225,32 +251,6 @@ export const InputPanel: React.FC<InputPanelProps> = ({
             <span>4:5 (1080×1350)</span>
           </div>
         </div>
-      </div>
-
-      {/* ── GENERATE AI BUTTON ── */}
-      <div className="pt-2">
-        <button
-          type="button"
-          onClick={onGenerate}
-          disabled={isGenerating || !formData.topic.trim()}
-          className="relative w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-extrabold text-base shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:opacity-95 active:scale-[0.99] transition-all disabled:opacity-50 disabled:pointer-events-none overflow-hidden group cursor-pointer"
-        >
-          <div className="relative z-10 flex items-center justify-center space-x-2">
-            {isGenerating ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span>AI가 4:5 카드뉴스 제작 중...</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-5 h-5 animate-bounce text-amber-300" />
-                <span>AI 카드뉴스 생성하기</span>
-              </>
-            )}
-          </div>
-
-          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000" />
-        </button>
       </div>
     </div>
   );
