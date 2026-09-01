@@ -43,9 +43,9 @@ export const SlideCard: React.FC<SlideCardProps> = ({
         }}
         className={`relative flex flex-col justify-between p-16 overflow-hidden ${theme.bgStyle} ${theme.textPrimary}`}
       >
-        {/* Sleek Atmospheric Ambient Glows */}
-        <div className="absolute -top-32 -right-32 w-[750px] h-[750px] bg-gradient-to-bl from-indigo-500/20 via-purple-500/15 to-transparent rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-32 -left-32 w-[700px] h-[700px] bg-gradient-to-tr from-pink-500/15 via-blue-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+        {/* Crisp Gradient Decorative Accents (No blur filter artifacts) */}
+        <div className="absolute -top-32 -right-32 w-[600px] h-[600px] bg-indigo-500/10 rounded-full pointer-events-none" />
+        <div className="absolute -bottom-32 -left-32 w-[550px] h-[550px] bg-purple-500/10 rounded-full pointer-events-none" />
 
         {/* ── 1. TOP HEADER SECTION ── */}
         <div className="relative z-10 flex items-center justify-between w-full pt-2 flex-shrink-0">
@@ -61,7 +61,7 @@ export const SlideCard: React.FC<SlideCardProps> = ({
             )}
           </div>
 
-          <div className="flex items-center space-x-2.5 px-6 py-2.5 rounded-full bg-black/30 backdrop-blur-xl border border-white/15 text-xl font-bold tracking-tight shadow-sm">
+          <div className="flex items-center space-x-2.5 px-6 py-2.5 rounded-full bg-black/40 border border-white/15 text-xl font-bold tracking-tight shadow-sm">
             <span className="w-3.5 h-3.5 rounded-full bg-emerald-400 animate-pulse" />
             <span>{brandHandle}</span>
           </div>
@@ -73,7 +73,7 @@ export const SlideCard: React.FC<SlideCardProps> = ({
           {/* A. COVER SLIDE */}
           {slide.type === 'cover' && (
             <div className="space-y-12 text-center max-w-[980px] mx-auto flex flex-col items-center justify-center my-auto">
-              <div className="inline-flex items-center space-x-3 px-8 py-3.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-2xl font-black tracking-wider text-amber-300 shadow-xl">
+              <div className="inline-flex items-center space-x-3 px-8 py-3.5 rounded-full bg-white/10 border border-white/20 text-2xl font-black tracking-wider text-amber-300 shadow-xl">
                 <Sparkles className="w-7 h-7 text-amber-400 fill-amber-400" />
                 <span>INSTAGRAM TREND REPORT</span>
               </div>
@@ -122,7 +122,7 @@ export const SlideCard: React.FC<SlideCardProps> = ({
               </h2>
 
               {/* Large Body Content Card */}
-              <div className={`p-10 rounded-3xl border shadow-2xl backdrop-blur-xl ${theme.cardBgStyle} ${theme.borderStyle}`}>
+              <div className={`p-10 rounded-3xl border shadow-2xl ${theme.cardBgStyle} ${theme.borderStyle}`}>
                 <p className={`text-3xl sm:text-4xl leading-[1.75] font-medium break-keep ${theme.textSecondary}`}>
                   {slide.body || '본문 설명 문장이 들어갑니다.'}
                 </p>
@@ -170,7 +170,7 @@ export const SlideCard: React.FC<SlideCardProps> = ({
                 ]).map((item, idx) => (
                   <div
                     key={idx}
-                    className={`flex items-center space-x-6 p-6 rounded-3xl border backdrop-blur-xl shadow-lg ${theme.cardBgStyle} ${theme.borderStyle}`}
+                    className={`flex items-center space-x-6 p-6 rounded-3xl border shadow-lg ${theme.cardBgStyle} ${theme.borderStyle}`}
                   >
                     <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-emerald-400 flex-shrink-0 shadow-sm">
                       <Check className="w-8 h-8 stroke-[3]" />
@@ -209,7 +209,7 @@ export const SlideCard: React.FC<SlideCardProps> = ({
               </h2>
 
               <div className="grid grid-cols-2 gap-7">
-                <div className="p-8 rounded-3xl bg-rose-950/50 border-2 border-rose-500/50 space-y-4 shadow-xl">
+                <div className="p-8 rounded-3xl bg-rose-950/80 border-2 border-rose-500/50 space-y-4 shadow-xl">
                   <div className="flex items-center space-x-2.5 text-rose-400 font-black text-2xl">
                     <X className="w-8 h-8 stroke-[3]" />
                     <span>{slide.left_label || '❌ 흔한 오해'}</span>
@@ -219,7 +219,7 @@ export const SlideCard: React.FC<SlideCardProps> = ({
                   </p>
                 </div>
 
-                <div className="p-8 rounded-3xl bg-emerald-950/50 border-2 border-emerald-500/60 space-y-4 shadow-xl">
+                <div className="p-8 rounded-3xl bg-emerald-950/80 border-2 border-emerald-500/60 space-y-4 shadow-xl">
                   <div className="flex items-center space-x-2.5 text-emerald-400 font-black text-2xl">
                     <Check className="w-8 h-8 stroke-[3]" />
                     <span>{slide.right_label || '⭕ 진짜 팩트'}</span>
@@ -280,7 +280,7 @@ export const SlideCard: React.FC<SlideCardProps> = ({
             <span>INSTAGRAM 4:5 CAROUSEL</span>
           </div>
 
-          <div className="flex items-center space-x-2 px-6 py-2 rounded-full bg-white/10 backdrop-blur-md">
+          <div className="flex items-center space-x-2 px-6 py-2 rounded-full bg-white/10">
             <span className="font-black text-white">{slide.page}</span>
             <span className="opacity-50">/</span>
             <span>{totalSlides}</span>
@@ -299,7 +299,7 @@ export const SlideCard: React.FC<SlideCardProps> = ({
             <div className="absolute top-[135px] left-0 right-0 h-[1080px] border-2 border-dashed border-emerald-400/70 flex items-start justify-end p-4">
               <span className="px-4 py-1.5 rounded-full bg-emerald-950/90 text-emerald-300 text-sm font-black border border-emerald-400 shadow-lg flex items-center space-x-1.5">
                 <Grid className="w-4 h-4" />
-                <span>1:1 프로필 안전 영역 (1080×1080px)</span>
+                <span>1:1 프로필 안전 영역 (1080×1350)</span>
               </span>
             </div>
 
