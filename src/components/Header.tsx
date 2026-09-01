@@ -1,5 +1,6 @@
 import React from 'react';
 import { Key, Download, CheckCircle2, Camera } from 'lucide-react';
+import { APP_VERSION } from '../constants/version';
 
 interface HeaderProps {
   hasApiKey: boolean;
@@ -19,7 +20,7 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Brand Logo */}
+        {/* Brand Logo & Version Badge */}
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-0.5 shadow-lg shadow-indigo-500/30 flex items-center justify-center">
             <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
@@ -31,8 +32,9 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="font-black text-lg tracking-tight bg-gradient-to-r from-white via-indigo-200 to-pink-300 bg-clip-text text-transparent">
                 InstaCard AI
               </span>
-              <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                PRO
+              {/* Semantic Version Badge */}
+              <span className="px-2 py-0.5 text-xs font-black rounded-full bg-gradient-to-r from-indigo-500/20 to-pink-500/20 text-indigo-300 border border-indigo-400/40 shadow-sm">
+                v{APP_VERSION.version}
               </span>
             </div>
             <p className="text-[11px] text-slate-400 font-medium hidden sm:block">

@@ -371,11 +371,15 @@ export function App() {
 
       {/* ── FOOTER ── */}
       <footer className="w-full border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-400">
-        <p className="flex items-center justify-center space-x-1.5">
-          <span>Crafted with</span>
-          <span className="text-rose-500">❤️</span>
-          <span>for @kimppungsamssi • 100% Automated by Google Gemini AI</span>
-        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+          <span className="font-bold text-slate-300">InstaCard AI v1.1.0</span>
+          <span className="hidden sm:inline text-slate-600">•</span>
+          <p className="flex items-center space-x-1.5">
+            <span>Crafted with</span>
+            <span className="text-rose-500">❤️</span>
+            <span>for @kimppungsamssi • 100% Automated by Google Gemini AI</span>
+          </p>
+        </div>
       </footer>
     </div>
   );
