@@ -1,9 +1,9 @@
 import React from 'react';
-import { Key, Download, CheckCircle2, Camera } from 'lucide-react';
+import { Download, CheckCircle2, Camera } from 'lucide-react';
 import { APP_VERSION } from '../constants/version';
 
 interface HeaderProps {
-  hasApiKey: boolean;
+  hasApiKey?: boolean;
   onOpenSettings: () => void;
   onExportAll: () => void;
   isExporting: boolean;
@@ -11,7 +11,6 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  hasApiKey,
   onOpenSettings,
   onExportAll,
   isExporting,
