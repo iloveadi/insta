@@ -5,6 +5,7 @@ import type {
 } from './types/cardnews';
 import { THEME_PRESETS, VIRAL_QUICK_CATEGORIES } from './constants/themes';
 import type { ViralQuickCategory } from './constants/themes';
+import { INITIAL_PROJECT } from './constants/initialProject';
 import { 
   generateCardNews, 
   generateViralByQuickCategory,
@@ -47,17 +48,7 @@ export function App() {
   });
 
   // Active generated project
-  const [project, setProject] = useState<CardNewsProject>(() => {
-    return generateDynamicSmartProject({
-      topic: '2026년 일잘러가 몰래 쓰는 무료 AI 도구 5선',
-      targetAudience: '2030 직장인',
-      category: 'curation',
-      slideCount: 5,
-      theme: 'modern_dark',
-      aspectRatio: '4:5',
-      brandHandle: '@kimppungsamssi',
-    });
-  });
+  const [project, setProject] = useState<CardNewsProject>(INITIAL_PROJECT);
 
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [viewMode, setViewMode] = useState<'carousel' | 'grid'>('carousel');
