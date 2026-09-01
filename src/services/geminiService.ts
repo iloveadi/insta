@@ -1,6 +1,8 @@
 import type { CardNewsProject, GenerationRequest, Slide, SlideType, CardNewsCategory, ThemePresetId, AspectRatio } from '../types/cardnews';
 import type { ViralQuickCategory } from '../constants/themes';
 
+const OFFICIAL_MODEL = 'gemini-1.5-flash';
+
 const SYSTEM_PROMPT = `당신은 100만 팔로워를 보유한 최상위 인스타그램 카드뉴스 전문 크리에이터이자 카피라이터입니다.
 사용자가 제공하는 [주제], [타깃 독자], [카드뉴스 유형], [슬라이드 수]에 맞춰 인스타그램 피드에서 스와이프를 유발하고 저장/공유율을 극대화하는 카드뉴스를 기획하세요.
 
@@ -19,78 +21,61 @@ const SYSTEM_PROMPT = `당신은 100만 팔로워를 보유한 최상위 인스�
 
 반드시 정해진 JSON 스키마 형식만을 반환하세요.`;
 
-// Test API Key Validity with Full Diagnostic Output
+// ── 1. API KEY VALIDITY TEST (Official gemini-1.5-flash & Detailed Debug Logging) ──
 export async function testGeminiApiKey(apiKey: string): Promise<{ success: boolean; modelName?: string; error?: string }> {
-  const cleanKey = apiKey.trim();
+  const cleanKey = (apiKey || '').trim();
   if (!cleanKey) {
     return { success: false, error: 'API 키가 입력되지 않았습니다.' };
   }
 
-  // Official Gemini model endpoints
-  const models = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
-  let lastErrorDetail = '';
+  const endpointUrl = `https://generativelanguage.googleapis.com/v1beta/models/${OFFICIAL_MODEL}:generateContent?key=${encodeURIComponent(cleanKey)}`;
 
-  for (const model of models) {
-    // 1. Try standard query param
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(cleanKey)}`;
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: 'Ping test. Reply with "OK".' }] }]
-        })
-      });
+  try {
+    const res = await fetch(endpointUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [{ text: 'ping' }],
+          },
+        ],
+      }),
+    });
 
-      if (res.ok) {
-        return { success: true, modelName: model };
-      }
-
-      const errJson = await res.json().catch(() => null);
-      if (errJson?.error?.message) {
-        lastErrorDetail = errJson.error.message;
-      }
-    } catch (err: any) {
-      lastErrorDetail = err?.message || '네트워크 통신 오류';
+    if (res.ok) {
+      console.log(`[Gemini API Test Success] Model: ${OFFICIAL_MODEL}, Status: ${res.status}`);
+      return { success: true, modelName: OFFICIAL_MODEL };
     }
 
-    // 2. Try Authorization Bearer header (for Vertex / OAuth tokens)
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${cleanKey}`
-        },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: 'Ping test. Reply with "OK".' }] }]
-        })
-      });
+    const errJson = await res.json().catch(() => null);
+    const errorMsg = errJson?.error?.message || `HTTP ${res.status} ${res.statusText}`;
+    console.error(`[Gemini API Test Error] Status ${res.status}:`, errJson || errorMsg);
 
-      if (res.ok) {
-        return { success: true, modelName: model };
-      }
-    } catch (err: any) {
-      // ignore
-    }
+    return {
+      success: false,
+      error: `[Status ${res.status}] ${errorMsg}`,
+    };
+  } catch (err: any) {
+    console.error('[Gemini API Test Network Exception]:', err);
+    return {
+      success: false,
+      error: `네트워크 오류: ${err?.message || '통신에 실패했습니다.'}`,
+    };
   }
-
-  return { 
-    success: false, 
-    error: lastErrorDetail || 'Google Gemini API 인증 실패 (키 또는 권한을 확인해주세요)' 
-  };
 }
 
-// Strictly Call Real Google Gemini API
+// ── 2. REAL-TIME CARD NEWS GENERATION VIA GEMINI-1.5-FLASH ──
 export async function generateCardNews(request: GenerationRequest): Promise<CardNewsProject> {
-  const apiKey = (request.apiKey || (import.meta.env.VITE_GEMINI_API_KEY as string) || '').trim();
+  const cleanKey = (request.apiKey || (import.meta.env.VITE_GEMINI_API_KEY as string) || '').trim();
 
-  if (!apiKey) {
+  if (!cleanKey) {
     throw new Error('API_KEY_REQUIRED');
   }
 
-  const models = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
+  const endpointUrl = `https://generativelanguage.googleapis.com/v1beta/models/${OFFICIAL_MODEL}:generateContent?key=${encodeURIComponent(cleanKey)}`;
 
   const userPrompt = `
 [카드뉴스 생성 요청]
@@ -99,87 +84,102 @@ export async function generateCardNews(request: GenerationRequest): Promise<Card
 - 카드뉴스 유형: ${request.category}
 - 총 슬라이드 수: ${request.slideCount}장 (표지 1장 + 본문 ${request.slideCount - 2}장 + CTA 1장)
 - 브랜드 핸들: ${request.brandHandle || '@kimppungsamssi'}
-- 무작위 난수 시드: ${Date.now()}-${Math.random()}
+- 무작위 시드: ${Date.now()}-${Math.random()}
 
-반드시 아래 JSON 형식으로만 응답하세요:
+반드시 아래 형식의 JSON 데이터만 출력하세요 (마크다운 백틱 포함/미포함 무관):
 {
   "slides": [
-    { "type": "cover", "tag": "🔥 ${request.targetAudience} 필독", "main_title": "...", "sub_title": "..." },
-    { "type": "content", "tag": "💡 실전 꿀팁 01", "step_or_num": "01", "title": "...", "body": "...", "tip": "..." },
-    { "type": "content", "tag": "💡 실전 꿀팁 02", "step_or_num": "02", "title": "...", "body": "...", "tip": "..." },
-    { "type": "content", "tag": "💡 실전 꿀팁 03", "step_or_num": "03", "title": "...", "body": "...", "tip": "..." },
-    { "type": "cta", "tag": "💾 SAVE & SHARE", "main_title": "...", "sub_title": "..." }
+    { 
+      "type": "cover", 
+      "tag": "🔥 ${request.targetAudience} 필독", 
+      "main_title": "...", 
+      "sub_title": "..." 
+    },
+    { 
+      "type": "content", 
+      "tag": "💡 실전 꿀팁 01", 
+      "step_or_num": "01", 
+      "title": "...", 
+      "body": "...", 
+      "tip": "..." 
+    },
+    { 
+      "type": "content", 
+      "tag": "💡 실전 꿀팁 02", 
+      "step_or_num": "02", 
+      "title": "...", 
+      "body": "...", 
+      "tip": "..." 
+    },
+    { 
+      "type": "content", 
+      "tag": "💡 실전 꿀팁 03", 
+      "step_or_num": "03", 
+      "title": "...", 
+      "body": "...", 
+      "tip": "..." 
+    },
+    { 
+      "type": "cta", 
+      "tag": "💾 SAVE & SHARE", 
+      "main_title": "...", 
+      "sub_title": "..." 
+    }
   ],
   "instagram_caption": "..."
 }`;
 
-  let lastError = '';
-
-  for (const model of models) {
-    // Try query param
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          contents: [{ parts: [{ text: userPrompt }] }],
-          generationConfig: {
-            responseMimeType: 'application/json',
-            temperature: 0.95,
-          }
-        })
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (rawText) {
-          const parsed = JSON.parse(rawText);
-          return formatToProject(parsed, request);
-        }
-      } else {
-        const err = await res.json().catch(() => null);
-        lastError = err?.error?.message || `HTTP ${res.status}`;
-      }
-    } catch (e: any) {
-      lastError = e?.message || '네트워크 오류';
-    }
-
-    // Try Bearer token
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+  try {
+    const res = await fetch(endpointUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        systemInstruction: {
+          parts: [{ text: SYSTEM_PROMPT }],
         },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          contents: [{ parts: [{ text: userPrompt }] }],
-          generationConfig: {
-            responseMimeType: 'application/json',
-            temperature: 0.95,
-          }
-        })
-      });
+        contents: [
+          {
+            parts: [{ text: userPrompt }],
+          },
+        ],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          temperature: 0.95,
+        },
+      }),
+    });
 
-      if (res.ok) {
-        const data = await res.json();
-        const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (rawText) {
-          const parsed = JSON.parse(rawText);
-          return formatToProject(parsed, request);
-        }
-      }
-    } catch (e: any) {
-      // ignore
+    if (!res.ok) {
+      const errJson = await res.json().catch(() => null);
+      const errorMsg = errJson?.error?.message || `HTTP ${res.status}`;
+      console.error(`[Gemini Generation Error] Status ${res.status}:`, errJson);
+      throw new Error(`Google API 오류 (${res.status}): ${errorMsg}`);
     }
-  }
 
-  throw new Error(`Gemini API 통신 실패: ${lastError}`);
+    const data = await res.json();
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!rawText) {
+      throw new Error('Google Gemini로부터 응답 텍스트를 받지 못했습니다.');
+    }
+
+    // Parse JSON
+    let parsed: any;
+    try {
+      parsed = JSON.parse(rawText);
+    } catch {
+      // Fallback: extract json from codeblocks if any
+      const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      parsed = JSON.parse(cleaned);
+    }
+
+    return formatToProject(parsed, request);
+  } catch (err: any) {
+    console.error('[Gemini Generate Exception]:', err);
+    throw err;
+  }
 }
 
 function formatToProject(data: any, req: GenerationRequest): CardNewsProject {
