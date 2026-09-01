@@ -60,7 +60,11 @@ export const SlideCard: React.FC<SlideCardProps> = ({
             </span>
           </div>
 
-          <div className="flex items-center space-x-2.5 px-6 py-2.5 rounded-full bg-black/40 border border-white/15 text-xl font-bold tracking-tight shadow-sm">
+          <div className={`flex items-center space-x-2.5 px-6 py-2.5 rounded-full border text-xl font-bold tracking-tight shadow-sm ${
+            theme.isDark 
+              ? 'bg-black/40 border-white/15 text-white' 
+              : 'bg-white/90 border-slate-300 text-slate-900 shadow-slate-200'
+          }`}>
             <span className="w-3.5 h-3.5 rounded-full bg-emerald-400 animate-pulse" />
             <span>{brandHandle}</span>
           </div>
@@ -72,7 +76,11 @@ export const SlideCard: React.FC<SlideCardProps> = ({
           {/* A. COVER SLIDE */}
           {slide.type === 'cover' && (
             <div className="space-y-12 text-center max-w-[980px] mx-auto flex flex-col items-center justify-center my-auto">
-              <div className="inline-flex items-center space-x-3 px-8 py-3.5 rounded-full bg-white/10 border border-white/20 text-2xl font-black tracking-wider text-amber-300 shadow-xl">
+              <div className={`inline-flex items-center space-x-3 px-8 py-3.5 rounded-full border text-2xl font-black tracking-wider shadow-xl ${
+                theme.isDark 
+                  ? 'bg-white/10 border-white/20 text-amber-300' 
+                  : 'bg-amber-100 border-amber-300 text-amber-900'
+              }`}>
                 <Sparkles className="w-7 h-7 text-amber-400 fill-amber-400" />
                 <span>INSTAGRAM TREND REPORT</span>
               </div>
@@ -81,7 +89,7 @@ export const SlideCard: React.FC<SlideCardProps> = ({
                 className={`text-6xl sm:text-7xl font-black leading-[1.3] tracking-tight drop-shadow-lg break-keep px-2 ${
                   theme.isDark
                     ? 'bg-gradient-to-r from-white via-slate-100 to-slate-200 bg-clip-text text-transparent'
-                    : 'text-slate-900'
+                    : 'text-slate-950'
                 }`}
               >
                 {slide.main_title || '매력적인 메인 후킹 타이틀'}
@@ -95,7 +103,11 @@ export const SlideCard: React.FC<SlideCardProps> = ({
 
               {/* Cover Bottom Swipe CTA Badge */}
               <div className="pt-4 flex items-center justify-center">
-                <div className="px-9 py-4.5 rounded-3xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white text-2xl font-black flex items-center space-x-3.5 shadow-2xl shadow-indigo-500/40 border border-white/20">
+                <div className={`px-9 py-4.5 rounded-3xl text-white text-2xl font-black flex items-center space-x-3.5 shadow-2xl border ${
+                  theme.accentGradient 
+                    ? `bg-gradient-to-r ${theme.accentGradient} border-white/20 shadow-indigo-500/30` 
+                    : 'bg-indigo-600 border-white/20'
+                }`}>
                   <span>옆으로 넘겨서 꿀팁 확인</span>
                   <ArrowRight className="w-8 h-8 animate-pulse text-white" />
                 </div>
@@ -109,7 +121,11 @@ export const SlideCard: React.FC<SlideCardProps> = ({
               {/* Step / Number Badge */}
               {slide.step_or_num && (
                 <div>
-                  <span className="px-7 py-3 rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-black text-2xl tracking-wider shadow-lg shadow-indigo-500/30 inline-block">
+                  <span className={`px-7 py-3 rounded-2xl text-white font-black text-2xl tracking-wider shadow-lg inline-block ${
+                    theme.accentGradient 
+                      ? `bg-gradient-to-r ${theme.accentGradient}` 
+                      : 'bg-indigo-600'
+                  }`}>
                     {slide.step_or_num}
                   </span>
                 </div>
@@ -122,22 +138,22 @@ export const SlideCard: React.FC<SlideCardProps> = ({
 
               {/* Large Body Content Card */}
               <div className={`p-10 rounded-3xl border shadow-2xl ${theme.cardBgStyle} ${theme.borderStyle}`}>
-                <p className={`text-3xl sm:text-4xl leading-[1.75] font-medium break-keep ${theme.textSecondary}`}>
+                <p className={`text-3xl sm:text-4xl leading-[1.75] font-semibold break-keep ${theme.textSecondary}`}>
                   {slide.body || '본문 설명 문장이 들어갑니다.'}
                 </p>
               </div>
 
-              {/* PRO TIP Box */}
+              {/* PRO TIP Box (100% High-Contrast Color Dynamic) */}
               {slide.tip && (
                 <div className={`p-7 rounded-3xl border flex items-start space-x-6 shadow-xl ${theme.tipBg} ${theme.tipBorder}`}>
                   <div className="p-3.5 rounded-2xl bg-amber-400 text-slate-950 flex-shrink-0 mt-0.5 shadow-lg">
                     <Lightbulb className="w-8 h-8 stroke-[2.5]" />
                   </div>
                   <div className="flex-1">
-                    <span className="block text-2xl font-black text-amber-400 mb-1 tracking-wide">
+                    <span className={`block text-2xl font-black mb-1.5 tracking-wide ${theme.tipTitle}`}>
                       💡 꿀팁 포인트 (PRO TIP)
                     </span>
-                    <p className="text-2xl sm:text-3xl font-bold leading-relaxed break-keep text-slate-100">
+                    <p className={`text-2xl sm:text-3xl font-bold leading-relaxed break-keep ${theme.tipText}`}>
                       {slide.tip}
                     </p>
                   </div>
@@ -174,7 +190,7 @@ export const SlideCard: React.FC<SlideCardProps> = ({
                     <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-emerald-400 flex-shrink-0 shadow-sm">
                       <Check className="w-8 h-8 stroke-[3]" />
                     </div>
-                    <span className="text-2xl sm:text-3xl font-bold leading-snug break-keep flex-1">
+                    <span className={`text-2xl sm:text-3xl font-bold leading-snug break-keep flex-1 ${theme.textSecondary}`}>
                       {item}
                     </span>
                   </div>
@@ -184,7 +200,7 @@ export const SlideCard: React.FC<SlideCardProps> = ({
               {slide.tip && (
                 <div className={`p-6 rounded-3xl border flex items-center space-x-5 shadow-lg ${theme.tipBg} ${theme.tipBorder}`}>
                   <Lightbulb className="w-8 h-8 text-amber-400 flex-shrink-0" />
-                  <p className="text-2xl font-bold break-keep flex-1">
+                  <p className={`text-2xl font-bold break-keep flex-1 ${theme.tipText}`}>
                     {slide.tip}
                   </p>
                 </div>
@@ -208,22 +224,30 @@ export const SlideCard: React.FC<SlideCardProps> = ({
               </h2>
 
               <div className="grid grid-cols-2 gap-7">
-                <div className="p-8 rounded-3xl bg-rose-950/80 border-2 border-rose-500/50 space-y-4 shadow-xl">
-                  <div className="flex items-center space-x-2.5 text-rose-400 font-black text-2xl">
+                <div className={`p-8 rounded-3xl border-2 space-y-4 shadow-xl ${
+                  theme.isDark 
+                    ? 'bg-rose-950/80 border-rose-500/50' 
+                    : 'bg-rose-50 border-rose-300 text-slate-900'
+                }`}>
+                  <div className="flex items-center space-x-2.5 text-rose-500 font-black text-2xl">
                     <X className="w-8 h-8 stroke-[3]" />
                     <span>{slide.left_label || '❌ 흔한 오해'}</span>
                   </div>
-                  <p className="text-2xl sm:text-3xl font-semibold leading-relaxed opacity-90 break-keep">
+                  <p className="text-2xl sm:text-3xl font-bold leading-relaxed break-keep">
                     {slide.left_content || '시간만 많이 들이면 성과가 난다.'}
                   </p>
                 </div>
 
-                <div className="p-8 rounded-3xl bg-emerald-950/80 border-2 border-emerald-500/60 space-y-4 shadow-xl">
-                  <div className="flex items-center space-x-2.5 text-emerald-400 font-black text-2xl">
+                <div className={`p-8 rounded-3xl border-2 space-y-4 shadow-xl ${
+                  theme.isDark 
+                    ? 'bg-emerald-950/80 border-emerald-500/60' 
+                    : 'bg-emerald-50 border-emerald-300 text-slate-900'
+                }`}>
+                  <div className="flex items-center space-x-2.5 text-emerald-600 font-black text-2xl">
                     <Check className="w-8 h-8 stroke-[3]" />
                     <span>{slide.right_label || '⭕ 진짜 팩트'}</span>
                   </div>
-                  <p className="text-2xl sm:text-3xl font-bold leading-relaxed break-keep">
+                  <p className="text-2xl sm:text-3xl font-black leading-relaxed break-keep">
                     {slide.right_content || '집중도 높은 2시간이 8시간보다 훨씬 강력하다.'}
                   </p>
                 </div>
@@ -232,7 +256,7 @@ export const SlideCard: React.FC<SlideCardProps> = ({
               {slide.tip && (
                 <div className={`p-6 rounded-3xl border flex items-center space-x-5 shadow-lg ${theme.tipBg} ${theme.tipBorder}`}>
                   <Lightbulb className="w-8 h-8 text-amber-400 flex-shrink-0" />
-                  <p className="text-2xl font-bold break-keep flex-1">
+                  <p className={`text-2xl font-bold break-keep flex-1 ${theme.tipText}`}>
                     {slide.tip}
                   </p>
                 </div>
@@ -266,21 +290,23 @@ export const SlideCard: React.FC<SlideCardProps> = ({
                 </div>
               </div>
 
-              <div className="text-2xl font-bold text-slate-400 tracking-wider pt-2">
-                Follow <span className="text-indigo-400 font-black">{brandHandle}</span> for more daily tips
+              <div className={`text-2xl font-bold tracking-wider pt-2 ${theme.isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                Follow <span className="text-indigo-500 font-black">{brandHandle}</span> for more daily tips
               </div>
             </div>
           )}
         </div>
 
-        {/* ── 3. BOTTOM FOOTER SECTION ── */}
-        <div className="relative z-10 flex items-center justify-between w-full pb-2 pt-4 border-t border-white/15 text-2xl font-bold opacity-85 flex-shrink-0">
-          <div className="flex items-center space-x-2 text-slate-400">
+        {/* ── 3. BOTTOM FOOTER SECTION (Theme-Aware Contrast) ── */}
+        <div className={`relative z-10 flex items-center justify-between w-full pb-2 pt-4 border-t text-2xl font-bold flex-shrink-0 ${
+          theme.isDark ? 'border-white/15' : 'border-slate-300'
+        }`}>
+          <div className={`flex items-center space-x-2 ${theme.footerText}`}>
             <span>{brandHandle}</span>
           </div>
 
-          <div className="flex items-center space-x-2 px-6 py-2 rounded-full bg-white/10">
-            <span className="font-black text-white">{slide.page}</span>
+          <div className={`flex items-center space-x-2 px-6 py-2 rounded-full font-black ${theme.footerBadge}`}>
+            <span>{slide.page}</span>
             <span className="opacity-50">/</span>
             <span>{totalSlides}</span>
           </div>

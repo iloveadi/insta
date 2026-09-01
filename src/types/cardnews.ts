@@ -11,7 +11,11 @@ export type ThemePresetId =
   | 'soft_gradient'
   | 'bold_accent'
   | 'neon_cyber'
-  | 'pastel_editorial';
+  | 'pastel_editorial'
+  | 'contrast_navy_orange'
+  | 'contrast_purple_lime'
+  | 'contrast_teal_coral'
+  | 'contrast_yellow_black';
 
 export type AspectRatio = '1:1' | '4:5';
 
@@ -31,6 +35,10 @@ export interface ThemeConfig {
   tagText: string;
   tipBg: string;
   tipBorder: string;
+  tipText: string;
+  tipTitle: string;
+  footerText: string;
+  footerBadge: string;
   isDark: boolean;
 }
 

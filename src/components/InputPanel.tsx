@@ -198,14 +198,17 @@ export const InputPanel: React.FC<InputPanelProps> = ({
         </div>
       </div>
 
-      {/* ── 6. DESIGN THEME PRESET ── */}
+      {/* ── 6. DESIGN THEME PRESET (10 PRESETS WITH COMPLEMENTARY CONTRASTS) ── */}
       <div className="space-y-2">
-        <label className="flex items-center space-x-2 text-sm font-bold text-slate-200">
-          <Palette className="w-4 h-4 text-emerald-400" />
-          <span>디자인 테마</span>
-        </label>
+        <div className="flex items-center justify-between">
+          <label className="flex items-center space-x-2 text-sm font-bold text-slate-200">
+            <Palette className="w-4 h-4 text-emerald-400" />
+            <span>디자인 테마 (10종)</span>
+          </label>
+          <span className="text-[10px] text-amber-400 font-bold">⚡ 보색대비 테마 탑재</span>
+        </div>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
           {(Object.keys(THEME_PRESETS) as ThemePresetId[]).map((themeKey) => {
             const theme = THEME_PRESETS[themeKey];
             const isSelected = formData.theme === themeKey;
@@ -215,17 +218,22 @@ export const InputPanel: React.FC<InputPanelProps> = ({
                 key={themeKey}
                 type="button"
                 onClick={() => setFormData(prev => ({ ...prev, theme: themeKey }))}
-                className={`p-2 rounded-xl border text-left transition-all cursor-pointer ${
+                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                   isSelected
-                    ? 'border-indigo-500 ring-2 ring-indigo-500/30 bg-slate-800 shadow-md'
-                    : 'border-slate-800 bg-slate-900/70 hover:border-slate-700'
+                    ? 'border-indigo-500 ring-2 ring-indigo-500/40 bg-slate-800/90 shadow-lg'
+                    : 'border-slate-800 bg-slate-900/70 hover:border-slate-700 hover:bg-slate-900'
                 }`}
               >
-                <div className="h-5 rounded-md mb-1.5 overflow-hidden border border-white/10 flex">
-                  <div className={`w-2/3 h-full ${theme.bgStyle}`} />
-                  <div className={`w-1/3 h-full ${theme.accentBg}`} />
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-slate-300 font-bold">
+                    {theme.badge}
+                  </span>
+                  <div className="h-3.5 w-12 rounded overflow-hidden border border-white/15 flex">
+                    <div className={`w-2/3 h-full ${theme.bgStyle}`} />
+                    <div className={`w-1/3 h-full ${theme.accentBg}`} />
+                  </div>
                 </div>
-                <div className="text-[11px] font-bold text-white truncate">{theme.name}</div>
+                <div className="text-xs font-bold text-white truncate">{theme.name}</div>
               </button>
             );
           })}
