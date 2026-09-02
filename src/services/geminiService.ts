@@ -1,7 +1,11 @@
 import type { CardNewsProject, GenerationRequest, Slide, SlideType, CardNewsCategory, ThemePresetId, AspectRatio } from '../types/cardnews';
 import type { ViralQuickCategory } from '../constants/themes';
 
-const OFFICIAL_MODEL = 'gemini-3.6-flash';
+const CANDIDATE_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-3.6-flash',
+  'gemini-1.5-flash'
+];
 
 const SYSTEM_PROMPT = `당신은 인스타그램에서 수백만 조회수와 폭발적인 댓글/공유를 이끌어내는 최고의 바이럴 카드뉴스 전문 작가이자 카피라이터입니다.
 딱딱하고 지루한 백과사전식 말투는 절대 사절합니다! 사용자가 제공하는 [주제], [타깃 독자], [카드뉴스 유형]에 맞춰 독자가 "와 미쳤다 ㅋㅋㅋ", "완전 내 얘기잖아?!", "이거 우리 얘기 아님?"이라며 친구를 태그하고 바로 저장(Save)할 수밖에 없는 센스 넘치고 위트 있는 카드뉴스를 기획하세요.
@@ -25,50 +29,57 @@ const SYSTEM_PROMPT = `당신은 인스타그램에서 수백만 조회수와 �
 
 반드시 정해진 JSON 스키마 형식만을 반환하세요.`;
 
-// ── 1. API KEY VALIDITY TEST (Official gemini-3.6-flash) ──
+// ── 1. API KEY VALIDITY TEST (Multi-Model Resilient Ping) ──
 export async function testGeminiApiKey(rawKey: string): Promise<{ success: boolean; modelName?: string; error?: string }> {
   const apiKey = (rawKey || '').replace(/\s+/g, '');
   if (!apiKey) {
     return { success: false, error: 'API 키가 입력되지 않았습니다.' };
   }
 
-  try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${OFFICIAL_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  let lastError = '';
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [{ text: 'Hello' }],
-          },
-        ],
-      }),
-    });
+  for (const model of CANDIDATE_MODELS) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
-    if (response.ok) {
-      console.log(`[Gemini Test Success] Model: ${OFFICIAL_MODEL}, Status: ${response.status}`);
-      return { success: true, modelName: OFFICIAL_MODEL };
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: 'Ping' }],
+            },
+          ],
+        }),
+      });
+
+      if (response.ok) {
+        console.log(`[Gemini Test Success] Verified via model: ${model}`);
+        return { success: true, modelName: model };
+      }
+
+      const errorData = await response.json().catch(() => ({}));
+      const message = errorData.error?.message || `HTTP ${response.status} 오류`;
+      lastError = `[Status ${response.status}] ${message}`;
+      console.warn(`[Gemini Test ${model}]:`, lastError);
+
+      // If the key itself is invalid (400 / 403), stop immediately
+      if (response.status === 400 || response.status === 403) {
+        return { success: false, error: lastError };
+      }
+      // If 503 (high demand) or 404, loop continues to next candidate model!
+    } catch (err: any) {
+      lastError = `네트워크 오류: ${err?.message || '통신 실패'}`;
     }
-
-    const errorData = await response.json().catch(() => ({}));
-    const message = errorData.error?.message || `HTTP ${response.status} 오류`;
-    const lastError = `[Status ${response.status}] ${message}`;
-    console.error(`[Gemini Test ${OFFICIAL_MODEL} Failed]:`, lastError);
-
-    return {
-      success: false,
-      error: lastError,
-    };
-  } catch (err: any) {
-    return {
-      success: false,
-      error: `네트워크 오류: ${err?.message || '통신 실패'}`,
-    };
   }
+
+  return {
+    success: false,
+    error: lastError || '모든 구글 모델 엔드포인트에 일시적인 지연이 발생했습니다. 잠시 후 다시 시도해 주세요.',
+  };
 }
 
 // ── 2. REAL-TIME CARD NEWS GENERATION (Official gemini-3.6-flash) ──
@@ -158,57 +169,66 @@ export async function generateCardNews(request: GenerationRequest): Promise<Card
     return fetch(targetUrl, targetOptions);
   };
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${OFFICIAL_MODEL}:generateContent?key=${encodeURIComponent(rawKey)}`;
+  let lastError = '';
 
-  const res = await fetchWithRetry(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      systemInstruction: {
-        parts: [{ text: SYSTEM_PROMPT }],
-      },
-      contents: [
-        {
-          parts: [{ text: userPrompt }],
+  for (const model of CANDIDATE_MODELS) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(rawKey)}`;
+
+      const res = await fetchWithRetry(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      ],
-      generationConfig: {
-        responseMimeType: 'application/json',
-        temperature: 0.95,
-      },
-    }),
-  });
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [{ text: SYSTEM_PROMPT }],
+          },
+          contents: [
+            {
+              parts: [{ text: userPrompt }],
+            },
+          ],
+          generationConfig: {
+            responseMimeType: 'application/json',
+            temperature: 0.95,
+          },
+        }),
+      });
 
-  if (!res.ok) {
-    const errJson = await res.json().catch(() => null);
-    const errorMsg = errJson?.error?.message || `HTTP ${res.status}`;
-    const lastError = `[Status ${res.status}] ${errorMsg}`;
-    console.error(`[Gemini Gen ${OFFICIAL_MODEL} Failed]:`, lastError);
+      if (res.ok) {
+        const data = await res.json();
+        const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (rawText) {
+          let parsed: any;
+          try {
+            parsed = JSON.parse(rawText);
+          } catch {
+            const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+            parsed = JSON.parse(cleaned);
+          }
+          console.log(`[Gemini Generation Success] Generated via model: ${model}`);
+          return formatToProject(parsed, request);
+        }
+      }
 
-    if (res.status === 503) {
-      throw new Error('구글 AI 서버에 일시적인 전 세계 이용자 급증(503 과부하)이 발생했습니다. 잠시 후(5~10초 뒤) 다시 생성 버튼을 눌러주세요.');
+      const errJson = await res.json().catch(() => null);
+      const errorMsg = errJson?.error?.message || `HTTP ${res.status}`;
+      lastError = `[Status ${res.status}] ${errorMsg}`;
+      console.warn(`[Gemini Model ${model} Failed]:`, lastError);
+
+      if (res.status === 400 || res.status === 403) {
+        throw new Error(`Google API 호출 실패: ${lastError}`);
+      }
+    } catch (err: any) {
+      if (err.message?.includes('400') || err.message?.includes('403')) {
+        throw err;
+      }
+      lastError = err.message || '통신 실패';
     }
-    throw new Error(`Google API 호출 실패: ${lastError}`);
   }
 
-  const data = await res.json();
-  const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (!rawText) {
-    throw new Error('Google Gemini로부터 응답 텍스트를 받지 못했습니다.');
-  }
-
-  let parsed: any;
-  try {
-    parsed = JSON.parse(rawText);
-  } catch {
-    const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    parsed = JSON.parse(cleaned);
-  }
-
-  return formatToProject(parsed, request);
+  throw new Error(`Google API 호출 실패: ${lastError || '구글 AI 모델의 일시적 과부하가 발생했습니다. 잠시 후 다시 시도해 주세요.'}`);
 }
 
 function formatToProject(data: any, req: GenerationRequest): CardNewsProject {
