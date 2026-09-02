@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import type { 
   GenerationRequest, 
-  CardNewsProject 
+  CardNewsProject,
+  Slide
 } from './types/cardnews';
 import { THEME_PRESETS, VIRAL_QUICK_CATEGORIES } from './constants/themes';
 import type { ViralQuickCategory } from './constants/themes';
@@ -36,15 +37,16 @@ export function App() {
   // Safe Zone Guide Toggle
   const [showSafeZoneGuide, setShowSafeZoneGuide] = useState(false);
 
-  // Form input state (Fixed to 4:5 ratio)
+  // Form input state
   const [formData, setFormData] = useState<GenerationRequest>({
-    topic: '2026년 일잘러가 몰래 쓰는 무료 AI 도구 5선',
-    targetAudience: '2030 직장인',
+    topic: '직장인 영혼 탈곡되는 순간 TOP 5 💀',
+    targetAudience: 'K-직장인 (퇴사희망러)',
     category: 'curation',
     slideCount: 5,
-    theme: 'modern_dark',
+    theme: 'studio_editorial',
     aspectRatio: '4:5',
     brandHandle: '@kimppungsamssi',
+    tone: 'fun_humor',
   });
 
   // Active generated project
@@ -187,25 +189,26 @@ export function App() {
     handleQuickCategorySelect(randomCat);
   };
 
-  // Download Single Slide PNG (4:5 1080x1350)
+  // Download Single Slide PNG with Dynamic Ratio
   const handleDownloadSingleSlide = async (slideId: string, pageNum: number) => {
     try {
       const elementId = `export-slide-${slideId}`;
-      const filename = `${String(pageNum).padStart(2, '0')}_${project.topic.slice(0, 10).trim()}_4x5.png`;
-      await exportSlideToPng(elementId, filename);
+      const ratioSuffix = formData.aspectRatio.replace(':', 'x');
+      const filename = `${String(pageNum).padStart(2, '0')}_${project.topic.slice(0, 10).trim()}_${ratioSuffix}.png`;
+      await exportSlideToPng(elementId, filename, formData.aspectRatio);
     } catch (err) {
       console.error('Download error:', err);
       alert('이미지 다운로드 중 오류가 발생했습니다.');
     }
   };
 
-  // Download All Slides ZIP (4:5 1080x1350)
+  // Download All Slides ZIP with Dynamic Ratio
   const handleExportAllZip = async () => {
     setExportProgress({
       isOpen: true,
       current: 0,
       total: project.slides.length,
-      message: '4:5 고화질 렌더링 준비 중...',
+      message: `${formData.aspectRatio} 고화질 렌더링 준비 중...`,
       isComplete: false,
     });
 
@@ -213,6 +216,7 @@ export function App() {
       await exportAllSlidesToZip(
         project.slides,
         project.topic || 'instagram_cardnews',
+        formData.aspectRatio,
         (current, total, msg) => {
           setExportProgress({
             isOpen: true,
@@ -236,10 +240,24 @@ export function App() {
     }
   };
 
-  const activeTheme = THEME_PRESETS[formData.theme] || THEME_PRESETS.modern_dark;
+  // Update Active Slide Text
+  const handleUpdateSlide = (updated: Partial<Slide>) => {
+    setProject(prev => {
+      const newSlides = [...prev.slides];
+      if (newSlides[activeSlideIndex]) {
+        newSlides[activeSlideIndex] = {
+          ...newSlides[activeSlideIndex],
+          ...updated,
+        };
+      }
+      return { ...prev, slides: newSlides };
+    });
+  };
+
+  const activeTheme = THEME_PRESETS[formData.theme] || THEME_PRESETS.studio_editorial;
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-[#0B0C0E] text-[#F0F1F3] selection:bg-orange-500/30 selection:text-white">
       {/* ── HEADER ── */}
       <Header
         hasApiKey={Boolean(apiKey.trim())}
@@ -251,42 +269,42 @@ export function App() {
 
       {/* ── MAIN STUDIO CONTAINER ── */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Sleek Top Bar with View Mode Toggle */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-slate-800/80">
+        {/* Studio Top Control Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-white/[0.08]">
           <div>
-            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center space-x-2">
-              <span>인스타그램 4:5 고화질 카드뉴스 스튜디오</span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30">
-                1080×1350
+            <h2 className="text-lg sm:text-xl font-black text-white tracking-tight flex items-center space-x-2.5">
+              <span>인스타그램 에디토리얼 스튜디오</span>
+              <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-white/[0.08] text-orange-300 border border-orange-400/30">
+                {formData.aspectRatio === '3:4' ? '1080×1440 · 3:4 신규 격자' : formData.aspectRatio === '1:1' ? '1080×1080 · 1:1 클래식' : '1080×1350 · 4:5 피드 표준'}
               </span>
             </h2>
-            <p className="text-xs text-slate-400">
-              타깃 독자나 카테고리를 클릭하면 AI가 3초 만에 새로운 주제와 고화질 슬라이드를 완성합니다.
+            <p className="text-xs text-white/50 pt-0.5">
+              독자의 시선을 사로잡는 고감도 매거진 조판과 스마트 원클릭 기획을 경험하세요.
             </p>
           </div>
 
           {/* View Mode Toggle Switch */}
-          <div className="flex items-center space-x-1.5 bg-slate-900 p-1.5 rounded-2xl border border-slate-800 self-start sm:self-auto">
+          <div className="flex items-center space-x-1 bg-[#14151B] p-1 rounded-xl border border-white/[0.08] self-start sm:self-auto">
             <button
               onClick={() => setViewMode('carousel')}
-              className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 viewMode === 'carousel'
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-600/30'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-white text-black shadow-sm font-bold'
+                  : 'text-white/60 hover:text-white'
               }`}
             >
-              <Smartphone className="w-4 h-4" />
-              <span>피드 미리보기</span>
+              <Smartphone className="w-3.5 h-3.5" />
+              <span>피드 뷰</span>
             </button>
             <button
               onClick={() => setViewMode('grid')}
-              className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 viewMode === 'grid'
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-600/30'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-white text-black shadow-sm font-bold'
+                  : 'text-white/60 hover:text-white'
               }`}
             >
-              <LayoutGrid className="w-4 h-4" />
+              <LayoutGrid className="w-3.5 h-3.5" />
               <span>전체 갤러리</span>
             </button>
           </div>
@@ -294,9 +312,9 @@ export function App() {
 
         {/* Studio Split Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* LEFT COLUMN: Clean Unified Studio Panel (5 cols) */}
+          {/* LEFT COLUMN: Clean Studio Panel (5 cols) */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="rounded-3xl bg-slate-900/70 backdrop-blur-xl border border-slate-800/90 p-6 shadow-2xl">
+            <div className="rounded-2xl bg-[#111216] border border-white/[0.08] p-5 shadow-2xl">
               <InputPanel
                 formData={formData}
                 setFormData={setFormData}
@@ -305,6 +323,10 @@ export function App() {
                 onSelectRandomCategory={handleRandomCategorySelect}
                 onSelectAudience={handleSelectAudience}
                 isGenerating={isGenerating}
+                activeSlide={project.slides[activeSlideIndex]}
+                activeSlideIndex={activeSlideIndex}
+                totalSlides={project.slides.length}
+                onUpdateSlide={handleUpdateSlide}
               />
             </div>
           </div>
@@ -312,7 +334,7 @@ export function App() {
           {/* RIGHT COLUMN: Showcase Canvas (7 cols) */}
           <div className="lg:col-span-7 space-y-6">
             {viewMode === 'carousel' ? (
-              <div className="rounded-3xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 p-6 sm:p-8 shadow-2xl flex flex-col items-center justify-center">
+              <div className="rounded-3xl studio-canvas-stage border border-white/[0.08] p-6 sm:p-8 shadow-2xl flex flex-col items-center justify-center">
                 <PhoneMockup
                   slides={project.slides}
                   activeSlideIndex={activeSlideIndex}
@@ -323,10 +345,11 @@ export function App() {
                   onToggleSafeZoneGuide={() => setShowSafeZoneGuide(prev => !prev)}
                   onDownloadSingleSlide={handleDownloadSingleSlide}
                   instagramCaption={project.instagram_caption}
+                  aspectRatio={formData.aspectRatio}
                 />
               </div>
             ) : (
-              <div className="rounded-3xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 p-6 sm:p-8 shadow-2xl">
+              <div className="rounded-3xl studio-canvas-stage border border-white/[0.08] p-6 sm:p-8 shadow-2xl">
                 <GridView
                   slides={project.slides}
                   theme={activeTheme}
@@ -334,6 +357,7 @@ export function App() {
                   showSafeZoneGuide={showSafeZoneGuide}
                   onToggleSafeZoneGuide={() => setShowSafeZoneGuide(prev => !prev)}
                   onDownloadSingleSlide={handleDownloadSingleSlide}
+                  aspectRatio={formData.aspectRatio}
                 />
               </div>
             )}
@@ -341,7 +365,7 @@ export function App() {
         </div>
       </main>
 
-      {/* ── HIDDEN 1080×1350 4:5 FULL-SCALE RENDERING CONTAINER (FOR PNG/ZIP EXPORT) ── */}
+      {/* ── HIDDEN FULL-SCALE RENDERING CONTAINER (FOR PNG/ZIP EXPORT) ── */}
       <div className="fixed top-0 left-[-9999px] pointer-events-none opacity-0 select-none z-[-100]">
         {project.slides.map((slide) => (
           <div key={`export-wrapper-${slide.id}`}>
@@ -353,6 +377,7 @@ export function App() {
               totalSlides={project.slides.length}
               scale={1}
               showSafeZoneGuide={false}
+              aspectRatio={formData.aspectRatio}
             />
           </div>
         ))}
@@ -376,14 +401,12 @@ export function App() {
       />
 
       {/* ── FOOTER ── */}
-      <footer className="w-full border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-400">
+      <footer className="w-full border-t border-white/[0.06] bg-[#0B0C0E] py-6 text-center text-xs text-white/40">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
-          <span className="font-bold text-slate-300">InstaCard AI v1.2.4</span>
-          <span className="hidden sm:inline text-slate-600">•</span>
+          <span className="font-bold text-white/70">InstaCard Studio</span>
+          <span className="hidden sm:inline text-white/20">•</span>
           <p className="flex items-center space-x-1.5">
-            <span>Crafted with</span>
-            <span className="text-rose-500">❤️</span>
-            <span>for @kimppungsamssi • 100% Automated by Google Gemini AI</span>
+            <span>High-End Editorial Publishing System for Instagram</span>
           </p>
         </div>
       </footer>

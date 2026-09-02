@@ -1,6 +1,150 @@
 import type { ThemeConfig, ThemePresetId, CardNewsCategory } from '../types/cardnews';
 
 export const THEME_PRESETS: Record<ThemePresetId, ThemeConfig> = {
+  studio_editorial: {
+    id: 'studio_editorial',
+    name: '스튜디오 에디토리얼',
+    badge: '추천 No.1',
+    bgStyle: 'bg-[#FAF8F5]',
+    cardBgStyle: 'bg-white shadow-xl shadow-stone-300/40 border border-[#E8E4DC]',
+    textPrimary: 'text-[#181716]',
+    textSecondary: 'text-[#57534E]',
+    accentColor: '#E64A19',
+    accentBg: 'bg-[#E64A19] text-white',
+    borderStyle: 'border-[#E8E4DC]',
+    tagBg: 'bg-[#181716]',
+    tagText: 'text-[#FAF8F5]',
+    tipBg: 'bg-[#F5EFE9] border-l-4 border-l-[#E64A19]',
+    tipBorder: 'border-[#E8DFD3]',
+    tipTitle: 'text-[#E64A19] font-black',
+    tipText: 'text-[#292524] font-semibold',
+    footerText: 'text-[#78716C]',
+    footerBadge: 'bg-[#EDE7DE] text-[#181716]',
+    isDark: false,
+    eyebrowColor: 'text-[#E64A19]',
+    highlightBg: 'bg-[#E64A19]/10 text-[#E64A19]',
+    dividerColor: 'border-[#E8E4DC]',
+  },
+  obsidian_acid: {
+    id: 'obsidian_acid',
+    name: '옵시디언 & 애시드',
+    badge: '테크 매거진',
+    bgStyle: 'bg-[#0B0C0E]',
+    cardBgStyle: 'bg-[#13151A] border border-white/[0.09] shadow-2xl',
+    textPrimary: 'text-[#F9FAFB]',
+    textSecondary: 'text-[#9CA3AF]',
+    accentColor: '#CCFF00',
+    accentBg: 'bg-[#CCFF00] text-[#0B0C0E] font-black',
+    borderStyle: 'border-white/[0.08]',
+    tagBg: 'bg-[#CCFF00]',
+    tagText: 'text-[#0B0C0E] font-black',
+    tipBg: 'bg-[#151922] border-l-4 border-l-[#CCFF00]',
+    tipBorder: 'border-white/[0.1]',
+    tipTitle: 'text-[#CCFF00] font-black',
+    tipText: 'text-[#E5E7EB] font-semibold',
+    footerText: 'text-[#6B7280]',
+    footerBadge: 'bg-white/[0.08] text-white',
+    isDark: true,
+    eyebrowColor: 'text-[#CCFF00]',
+    highlightBg: 'bg-[#CCFF00]/15 text-[#CCFF00]',
+    dividerColor: 'border-white/[0.08]',
+  },
+  seoul_monochrome: {
+    id: 'seoul_monochrome',
+    name: '성수 미니멀리스트',
+    badge: '스위스 모던',
+    bgStyle: 'bg-[#0E0F12]',
+    cardBgStyle: 'bg-[#18191E] border border-white/[0.12] shadow-2xl',
+    textPrimary: 'text-[#FFFFFF]',
+    textSecondary: 'text-[#CBD5E1]',
+    accentColor: '#2563EB',
+    accentBg: 'bg-[#2563EB] text-white font-black',
+    borderStyle: 'border-white/[0.12]',
+    tagBg: 'bg-white',
+    tagText: 'text-[#0E0F12] font-black',
+    tipBg: 'bg-[#141B2D] border-l-4 border-l-[#3B82F6]',
+    tipBorder: 'border-blue-500/30',
+    tipTitle: 'text-[#60A5FA] font-black',
+    tipText: 'text-white font-semibold',
+    footerText: 'text-[#94A3B8]',
+    footerBadge: 'bg-white/[0.1] text-white',
+    isDark: true,
+    eyebrowColor: 'text-[#3B82F6]',
+    highlightBg: 'bg-blue-500/20 text-blue-300',
+    dividerColor: 'border-white/[0.12]',
+  },
+  nordic_forest: {
+    id: 'nordic_forest',
+    name: '노르딕 모스 & 골드',
+    badge: '프리미엄 웰니스',
+    bgStyle: 'bg-[#0C1A14]',
+    cardBgStyle: 'bg-[#14261F] border border-emerald-500/20 shadow-2xl',
+    textPrimary: 'text-[#F4F7F5]',
+    textSecondary: 'text-[#CAD8CF]',
+    accentColor: '#E5C07B',
+    accentBg: 'bg-[#E5C07B] text-[#0C1A14] font-black',
+    borderStyle: 'border-emerald-500/20',
+    tagBg: 'bg-[#E5C07B]',
+    tagText: 'text-[#0C1A14] font-black',
+    tipBg: 'bg-[#182F26] border-l-4 border-l-[#E5C07B]',
+    tipBorder: 'border-emerald-400/20',
+    tipTitle: 'text-[#E5C07B] font-black',
+    tipText: 'text-[#EAF2EC] font-semibold',
+    footerText: 'text-[#8FA899]',
+    footerBadge: 'bg-emerald-500/20 text-[#E5C07B]',
+    isDark: true,
+    eyebrowColor: 'text-[#E5C07B]',
+    highlightBg: 'bg-[#E5C07B]/15 text-[#E5C07B]',
+    dividerColor: 'border-emerald-500/20',
+  },
+  sunset_terracotta: {
+    id: 'sunset_terracotta',
+    name: '선셋 에스프레소',
+    badge: '라이프스타일',
+    bgStyle: 'bg-[#171210]',
+    cardBgStyle: 'bg-[#221B18] border border-orange-500/20 shadow-2xl',
+    textPrimary: 'text-[#FFF7ED]',
+    textSecondary: 'text-[#FED7AA]',
+    accentColor: '#F97316',
+    accentBg: 'bg-[#F97316] text-white font-black',
+    borderStyle: 'border-orange-500/20',
+    tagBg: 'bg-[#F97316]',
+    tagText: 'text-white font-black',
+    tipBg: 'bg-[#2A201C] border-l-4 border-l-[#F97316]',
+    tipBorder: 'border-orange-500/30',
+    tipTitle: 'text-[#FB923C] font-black',
+    tipText: 'text-[#FFF7ED] font-semibold',
+    footerText: 'text-[#A89284]',
+    footerBadge: 'bg-orange-500/20 text-[#FDBA74]',
+    isDark: true,
+    eyebrowColor: 'text-[#FB923C]',
+    highlightBg: 'bg-orange-500/15 text-[#FB923C]',
+    dividerColor: 'border-orange-500/20',
+  },
+  clean_atelier: {
+    id: 'clean_atelier',
+    name: '클린 아틀리에',
+    badge: '모던 화이트',
+    bgStyle: 'bg-[#FFFFFF]',
+    cardBgStyle: 'bg-[#F9FAFB] border border-[#E5E7EB] shadow-lg',
+    textPrimary: 'text-[#111827]',
+    textSecondary: 'text-[#4B5563]',
+    accentColor: '#0F172A',
+    accentBg: 'bg-[#0F172A] text-white font-black',
+    borderStyle: 'border-[#E5E7EB]',
+    tagBg: 'bg-[#0F172A]',
+    tagText: 'text-white font-black',
+    tipBg: 'bg-[#F3F4F6] border-l-4 border-l-[#0F172A]',
+    tipBorder: 'border-[#E5E7EB]',
+    tipTitle: 'text-[#111827] font-black',
+    tipText: 'text-[#374151] font-semibold',
+    footerText: 'text-[#9CA3AF]',
+    footerBadge: 'bg-[#E5E7EB] text-[#111827]',
+    isDark: false,
+    eyebrowColor: 'text-[#0F172A]',
+    highlightBg: 'bg-slate-100 text-slate-900',
+    dividerColor: 'border-slate-200',
+  },
   modern_dark: {
     id: 'modern_dark',
     name: 'Modern Dark',
@@ -274,102 +418,163 @@ export interface ViralQuickCategory {
 
 export const VIRAL_QUICK_CATEGORIES: ViralQuickCategory[] = [
   {
-    id: 'productivity_ai',
-    name: '생산성 & AI 툴',
-    emoji: '🚀',
-    target: '직장인 / 프리랜서',
-    description: '칼퇴를 부르는 필수 AI와 업무 효율화 치트키',
+    id: 'office_humor',
+    name: '직장인 현실 격공',
+    emoji: '💀',
+    target: 'K-직장인 (퇴사희망러)',
+    description: '뼈 맞아서 순살되는 월요병 & 칼퇴 & 월급 증발 썰',
     defaultFormat: 'curation',
-    defaultTheme: 'modern_dark',
+    defaultTheme: 'studio_editorial',
     topics: [
       {
-        topic: '2026년 일잘러가 몰래 쓰는 무료 AI 생산성 도구 5선',
+        topic: '직장인 영혼 탈곡되는 순간 TOP 5 (뼈 맞음 주의)',
         format: 'curation',
-        sub: '반복 업무 80% 줄이고 정시 퇴근하는 치트키 모음'
+        sub: '월요일 출근길부터 퇴근 10분 전까지... 나만 이러는 거 아니지? 😭'
+      },
+      {
+        topic: '월급날 통장 잔고가 3초 만에 로그아웃되는 과정',
+        format: 'curation',
+        sub: '하이패스 톨게이트마냥 스쳐 지나가는 내 소중한 월급의 최후'
+      },
+      {
+        topic: '탕비실에서 마주치면 가장 어색한 사람 유형 4선',
+        format: 'curation',
+        sub: '눈 마주치는 순간 뚝딱거리는 내 몸뚱아리 탈출법'
       }
     ]
   },
   {
-    id: 'finance_wealth',
-    name: '재테크 & 부업',
-    emoji: '📈',
-    target: '사회초년생 / N잡러',
-    description: '월 100만원 패시브 인컴과 현명한 자산 불리기',
-    defaultFormat: 'curation',
-    defaultTheme: 'bold_accent',
+    id: 'mbti_psychology',
+    name: '극T vs 극F & 심리',
+    emoji: '🧠',
+    target: 'MBTI 과몰입러',
+    description: '카톡 티키타카 대참사와 공감 200% 성향 탐구',
+    defaultFormat: 'myth_fact',
+    defaultTheme: 'obsidian_acid',
     topics: [
       {
-        topic: '사회초년생이 첫 1억 모으기 위해 반드시 끊어야 할 소비 습관 5가지',
+        topic: '극T와 극F가 카톡으로 대화할 때 일어나는 대참사 4선',
+        format: 'myth_fact',
+        sub: '위로해달라고 했더니 해결책 던져주는 T vs 혼자 감동받은 F'
+      },
+      {
+        topic: '외향인 코스프레하는 사회적 내향인(E 탈을 쓴 I) 특징 5가지',
+        format: 'checklist',
+        sub: '집에 도착하자마자 스마트폰 비행기 모드 켜는 이유'
+      },
+      {
+        topic: '은근 소름 돋는 MBTI별 숨겨진 흑막 모먼트',
         format: 'curation',
-        sub: '통장 쪼개기와 자동 저축으로 1년 만에 종잣돈 완성'
+        sub: '평소엔 천사 같다가 스위치 눌리면 제일 무서운 유형'
       }
     ]
   },
   {
-    id: 'self_growth',
-    name: '자기계발 & 동기부여',
-    emoji: '💡',
-    target: '2030 청년 / 성장러',
-    description: '멘탈 관리, 아침 루틴, 흔들리지 않는 습관 만들기',
-    defaultFormat: 'curation',
-    defaultTheme: 'contrast_navy_orange',
+    id: 'balance_game',
+    name: '댓글 폭발 밸런스 게임',
+    emoji: '⚖️',
+    target: '친구 태그 유발러',
+    description: '피 터지는 논쟁과 도파민 폭발 선택 장애 유발',
+    defaultFormat: 'myth_fact',
+    defaultTheme: 'sunset_terracotta',
     topics: [
       {
-        topic: '자소서 쓸 때 모르면 10시간 손해보는 챗GPT 황금 프롬프트 4가지',
-        format: 'curation',
-        sub: '경험 정리부터 기업 인재상 매칭까지 10분 만에 끝내는 프롬프트 모음'
+        topic: '친구들 모이면 밤새 피 터지는 황금 밸런스 게임 5선',
+        format: 'myth_fact',
+        sub: '절대 양보 못 해! 댓글 창 난리 나는 극강의 선택지'
+      },
+      {
+        topic: '평생 라면만 먹기 vs 평생 치킨만 먹기 (의외로 갈림)',
+        format: 'myth_fact',
+        sub: '당신의 혓바닥과 위장이 선택할 단 하나의 메뉴는?'
+      },
+      {
+        topic: '카톡 1초 만에 읽씹 vs 일주일 뒤 안읽씹 답장',
+        format: 'myth_fact',
+        sub: '더 킹받는 건 누구? 인간관계 파탄 직전 밸런스'
       }
     ]
   },
   {
-    id: 'marketing_branding',
-    name: '마케팅 & 브랜딩',
-    emoji: '📣',
-    target: '사업가 / 마케터',
-    description: '조회수 100만 터지는 콘텐츠 알고리즘과 카피라이팅',
+    id: 'alone_life',
+    name: '자취생 눈물 썰',
+    emoji: '🏠',
+    target: '프로자취러',
+    description: '배달앱의 배신과 자취방 인테리어 현실 직시',
     defaultFormat: 'curation',
-    defaultTheme: 'contrast_purple_lime',
+    defaultTheme: 'nordic_forest',
     topics: [
       {
-        topic: '인스타 릴스 조회수 100만 터지는 3초 후킹 카피 공식 5가지',
+        topic: '자취 5년차가 뼈저리게 깨달은 현실 자취 꿀팁 (배달앱 삭제각)',
         format: 'curation',
-        sub: '스크롤을 즉시 멈추게 만드는 결핍과 호기심 자극 템플릿'
+        sub: '인스타 감성 인테리어 꿈꾸다 원룸 창고 된 썰'
+      },
+      {
+        topic: '자취방에 절대 들이면 안 되는 예쁜 쓰레기 템 5선',
+        format: 'curation',
+        sub: '살 땐 설렜는데 지금은 옷걸이로 전락한 아이템들'
       }
     ]
   },
   {
-    id: 'health_lifestyle',
-    name: '건강 & 라이프스타일',
-    emoji: '🩺',
-    target: '일상 꿀팁 / 헬스러',
-    description: '수면의 질, 피로 회복, 활력 넘치는 하루 만들기',
-    defaultFormat: 'curation',
-    defaultTheme: 'pastel_editorial',
+    id: 'crazy_trivia',
+    name: '소름 돋는 충격 잡학',
+    emoji: '🍿',
+    target: '호기심 천국',
+    description: '외국인 문화충격과 당근마켓 레전드 실화 썰',
+    defaultFormat: 'story_insight',
+    defaultTheme: 'seoul_monochrome',
     topics: [
       {
-        topic: '학점 4.5 과탑 선배가 매일 쓰는 무료 대학생 생산성 툴 5선',
+        topic: '외국인이 한국 와서 기절초풍한 문화 충격 TOP 5',
         format: 'curation',
-        sub: '논문 리서치부터 팀플 PPT까지 10분 컷 끝내는 비법'
+        sub: '카페에 노트북 두고 화장실 가도 안 털리는 기적의 나라'
+      },
+      {
+        topic: '당근마켓 역대급 레전드 거래 썰 모음 (실화주의)',
+        format: 'story_insight',
+        sub: '네고 거부하다가 훈훈하게 결혼까지 골인한 레전드 사연'
+      }
+    ]
+  },
+  {
+    id: 'love_dating',
+    name: '연애 & 카톡 티키타카',
+    emoji: '💘',
+    target: '썸/연애 중인 사람',
+    description: '그린라이트 판독법과 썸 탈 때 정 털리는 순간',
+    defaultFormat: 'howto',
+    defaultTheme: 'clean_atelier',
+    topics: [
+      {
+        topic: '이 카톡 받으면 100% 그린라이트 vs 단순 친절 구별법',
+        format: 'howto',
+        sub: '혼자 김칫국 원샷하기 전에 꼭 확인해야 할 신호들'
+      },
+      {
+        topic: '썸 탈 때 정 털리는 최악의 카톡 말투 유형 4가지',
+        format: 'curation',
+        sub: '말 한마디로 설렘 와장창 깨지는 카톡 금기어 모음'
       }
     ]
   }
 ];
 
 export const DEFAULT_AUDIENCES = [
-  '2030 직장인',
-  '취업준비생',
-  '1인 창업가 / 자영업자',
-  '대학생',
-  '디자이너 / 개발자',
-  '마케터 / 크리에이터',
-  '초보 투자자',
-  '다이어터 / 헬스러'
+  'K-직장인 (퇴사희망러)',
+  '극T vs 극F',
+  '프로자취러',
+  'MBTI 과몰입러',
+  '썸/연애 중인 사람',
+  '대학생/취준생',
+  '갓생 실패러',
+  '다이어트 작심삼일러'
 ];
 
 export const SAMPLE_TOPICS = [
-  '2026년 일잘러가 몰래 쓰는 무료 AI 생산성 도구 5선',
-  '자소서 쓸 때 모르면 10시간 손해보는 챗GPT 황금 프롬프트 4가지',
-  '면접관이 3초 만에 합격 체크하는 1분 자기소개 공식',
-  '사회초년생이 첫 1억 모으기 위해 반드시 끊어야 할 소비 습관 5가지',
-  '광고비 0원으로 네이버 플레이스 & 인스타 지역 1위 찍는 법'
+  '직장인 영혼 탈곡되는 순간 TOP 5 (뼈 맞음 주의)',
+  '극T와 극F가 카톡으로 대화할 때 일어나는 대참사 4선',
+  '자취 5년차가 뼈저리게 깨달은 현실 자취 꿀팁 (배달앱 삭제각)',
+  '친구들 모이면 밤새 피 터지는 황금 밸런스 게임 5선',
+  '외국인이 한국 와서 기절초풍한 문화 충격 TOP 5'
 ];

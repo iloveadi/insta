@@ -3,21 +3,25 @@ import type { ViralQuickCategory } from '../constants/themes';
 
 const OFFICIAL_MODEL = 'gemini-3.6-flash';
 
-const SYSTEM_PROMPT = `당신은 100만 팔로워를 보유한 최상위 인스타그램 카드뉴스 전문 크리에이터이자 카피라이터입니다.
-사용자가 제공하는 [주제], [타깃 독자], [카드뉴스 유형], [슬라이드 수]에 맞춰 인스타그램 피드에서 스와이프를 유발하고 저장/공유율을 극대화하는 카드뉴스를 기획하세요.
+const SYSTEM_PROMPT = `당신은 인스타그램에서 수백만 조회수와 폭발적인 댓글/공유를 이끌어내는 최고의 바이럴 카드뉴스 전문 작가이자 카피라이터입니다.
+딱딱하고 지루한 백과사전식 말투는 절대 사절합니다! 사용자가 제공하는 [주제], [타깃 독자], [카드뉴스 유형]에 맞춰 독자가 "와 미쳤다 ㅋㅋㅋ", "완전 내 얘기잖아?!", "이거 우리 얘기 아님?"이라며 친구를 태그하고 바로 저장(Save)할 수밖에 없는 센스 넘치고 위트 있는 카드뉴스를 기획하세요.
 
 [핵심 작성 원칙 - 절대 준수]
-1. 모호하거나 뻔한 일반론(예: '첫 번째 포인트', '노력을 해야 한다')은 절대 금지합니다.
-2. 반드시 표지 제목과 100% 일치하는 구체적인 실명/도구명(예: ChatGPT, Claude, Notion, Perplexity 등), 실제 수치, 정확한 노하우, 행동 지침을 슬라이드마다 명확히 작성하세요.
-3. 매번 요청할 때마다 새로운 앵글과 참신하고 독창적인 세부 내용으로 다양하게 구성하세요.
-4. 슬라이드 구성:
-   - 표지 (Cover): 3초 만에 스크롤을 멈추게 하는 강력한 후킹 헤드라인과 타깃 태그.
-   - 본문: 각 슬라이드마다 
-     * 소제목(title): 명확하고 매력적인 핵심 소제목 (예: '01. Claude 3.7 - 코딩 & 긴 글 분석 1위')
-     * 본문(body): 모바일 가독성에 맞춘 2~3줄의 알찬 실전 요약 설명
-     * PRO TIP(tip): 바로 써먹을 수 있는 단 1줄의 실천 팁/단축키/활용법
-   - CTA (마지막): '저장해두고 필요할 때 꺼내보기' 등 저장/공유 유도.
-5. 인스타그램 캡션 (instagram_caption): 본문 핵심 요약 + 저장 유도 + 추천 해시태그 10~15개를 포함하여 이모지와 함께 작성.
+1. 톤앤매너 (Tone & Voice):
+   - 딱딱하고 교과서적인 설명('~해야 합니다', '~의 중요성') 절대 금지!
+   - 찰진 한국어 구어체, 뼈 때리는 극현실주의 공감, 유쾌한 풍자와 위트, 도파민 넘치는 찰떡 비유를 사용하세요.
+2. 표지 (Cover):
+   - 1초 만에 엄지손가락을 멈추게 하는 강력한 후킹 카피 (예: '직장인 영혼 탈곡되는 순간 TOP 5 💀', '극T와 극F가 카톡하면 벌어지는 대참사', '자취 5년차가 뼈저리게 깨달은 배달앱 삭제각 꿀팁')
+3. 본문 (Content):
+   - 소제목(title): 호기심을 극대화하는 명확하고 찰진 제목
+   - 본문(body): 생생한 현실 디테일과 공감 200% 에피소드/상황 묘사 (2~3줄)
+   - 꿀팁/인사이트(tip): 
+     * 유머/공감 주제일 때: 빵 터지는 현실 대처법이나 뼈 때리는 한 줄 팩트폭격
+     * 정보/가이드 주제일 때: 당장 써먹을 수 있는 구체적인 치트키
+4. CTA (마지막 슬라이드):
+   - 친구 태그 유도, 공감 투표, 저장 유도 (예: '나만 이런 거 아니지? 😭 같이 고통받을 동료 소환!')
+5. 인스타그램 캡션:
+   - 독자의 댓글 참여를 유발하는 질문 + 친구 태그 유도 + 꿀잼 해시태그 10개 이상.
 
 반드시 정해진 JSON 스키마 형식만을 반환하세요.`;
 
@@ -210,20 +214,23 @@ function formatToProject(data: any, req: GenerationRequest): CardNewsProject {
 
 export async function generateByTargetAudience(
   audience: string,
-  currentTheme: ThemePresetId = 'modern_dark',
+  currentTheme: ThemePresetId = 'studio_editorial',
   brandHandle: string = '@kimppungsamssi',
   apiKey?: string
 ): Promise<{ project: CardNewsProject; resolvedTopic: string; resolvedCategory: CardNewsCategory; resolvedTheme: ThemePresetId }> {
   const defaultTopics: Record<string, string> = {
-    '취업준비생': '2026년 서류 합격률 300% 높이는 챗GPT 자소서 & 포트폴리오 프롬프트',
-    '대학생': '학점 4.5 만점러들이 시험기간에 몰래 쓰는 AI 과제 요약 치트키',
-    '1인 창업가 / 자영업자': '광고비 0원으로 네이버 플레이스 & 인스타 지역 1위 찍는 법',
-    '2030 직장인': '2026년 일잘러가 몰래 쓰는 무료 AI 업무 자동화 도구 5선',
-    '재테크 / 투자자': '사회초년생이 3년 만에 종잣돈 5,000만원 만드는 4통장 시스템',
-    '마케터 / 크리에이터': '인스타 릴스 조회수 100만 터지는 3초 후킹 카피 공식 5가지'
+    'K-직장인 (퇴사희망러)': '직장인 영혼 탈곡되는 순간 TOP 5 (뼈 맞음 주의)',
+    '극T vs 극F': '극T와 극F가 카톡으로 대화할 때 일어나는 대참사 4선',
+    '프로자취러': '자취 5년차가 뼈저리게 깨달은 현실 자취 꿀팁 (배달앱 삭제각)',
+    'MBTI 과몰입러': '은근 소름 돋는 MBTI별 숨겨진 흑막 모먼트 5가지',
+    '썸/연애 중인 사람': '이 카톡 받으면 100% 그린라이트 vs 단순 친절 구별법',
+    '대학생/취준생': '개강 첫 주에 무조건 후회하는 대학생 단골 착각 4선',
+    '갓생 실패러': '1월 1일 계획 세우고 3일 만에 박살 나는 사람 특징 5선',
+    '다이어트 작심삼일러': '세상에서 제일 맛있는 야식의 유혹에 매번 지는 현실 이유',
+    '2030 직장인': '직장인 영혼 탈곡되는 순간 TOP 5 (뼈 맞음 주의)'
   };
 
-  const topic = defaultTopics[audience] || `${audience}를 위한 실전 핵심 꿀팁 3가지`;
+  const topic = defaultTopics[audience] || `${audience}들이 200% 격공하는 현실 꿀잼 썰`;
 
   const req: GenerationRequest = {
     topic,
@@ -247,7 +254,7 @@ export async function generateByTargetAudience(
 
 export async function generateViralByQuickCategory(
   category: ViralQuickCategory,
-  theme: ThemePresetId = 'modern_dark',
+  theme: ThemePresetId = 'studio_editorial',
   aspectRatio: AspectRatio = '4:5',
   brandHandle: string = '@kimppungsamssi',
   apiKey?: string

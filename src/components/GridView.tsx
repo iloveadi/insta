@@ -1,7 +1,7 @@
 import React from 'react';
-import type { Slide, ThemeConfig } from '../types/cardnews';
+import type { Slide, ThemeConfig, AspectRatio } from '../types/cardnews';
 import { SlideCard } from './SlideCard';
-import { Download, Grid } from 'lucide-react';
+import { Download, Grid, Layers } from 'lucide-react';
 
 interface GridViewProps {
   slides: Slide[];
@@ -10,6 +10,7 @@ interface GridViewProps {
   showSafeZoneGuide: boolean;
   onToggleSafeZoneGuide: () => void;
   onDownloadSingleSlide: (slideId: string, pageNum: number) => void;
+  aspectRatio?: AspectRatio;
 }
 
 export const GridView: React.FC<GridViewProps> = ({
@@ -19,24 +20,32 @@ export const GridView: React.FC<GridViewProps> = ({
   showSafeZoneGuide,
   onToggleSafeZoneGuide,
   onDownloadSingleSlide,
+  aspectRatio = '4:5',
 }) => {
-  // 4:5 Card Dimensions (1080 x 1350)
+  // Card Dimensions according to Aspect Ratio
   const cardWidth = 320;
+  const baseHeight = aspectRatio === '3:4' ? 1440 : aspectRatio === '1:1' ? 1080 : 1350;
   const canvasScale = cardWidth / 1080;
-  const cardHeight = 1350 * canvasScale; // 400px
+  const cardHeight = baseHeight * canvasScale;
+
+  const ratioBadge = aspectRatio === '3:4' ? '3:4 (1080×1440)' : aspectRatio === '1:1' ? '1:1 (1080×1080)' : '4:5 (1080×1350)';
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h3 className="text-lg font-bold text-white flex items-center space-x-2">
-            <span>4:5 슬라이드 갤러리</span>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-              전체 {slides.length}장 (1080×1350)
+          <h3 className="text-base font-bold text-white flex items-center space-x-2">
+            <Layers className="w-4 h-4 text-orange-400" />
+            <span>전체 슬라이드 갤러리</span>
+            <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-white/[0.08] text-orange-300 border border-orange-400/30">
+              {ratioBadge}
+            </span>
+            <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-white/[0.08] text-white/70 border border-white/[0.08]">
+              {slides.length} SLIDES
             </span>
           </h3>
-          <p className="text-xs text-slate-400">
-            생성된 전체 슬라이드를 한눈에 확인하고 개별 PNG로 저장할 수 있습니다.
+          <p className="text-xs text-white/50">
+            생성된 전체 슬라이드를 한눈에 검토하고 개별 고화질 PNG로 저장할 수 있습니다.
           </p>
         </div>
 
@@ -45,10 +54,10 @@ export const GridView: React.FC<GridViewProps> = ({
           <button
             type="button"
             onClick={onToggleSafeZoneGuide}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
               showSafeZoneGuide
-                ? 'bg-emerald-600 text-white border-emerald-400 ring-2 ring-emerald-500/30'
-                : 'bg-slate-900 border-slate-700 text-slate-300 hover:text-white'
+                ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/50 shadow-sm'
+                : 'bg-[#14151B] border-white/[0.08] text-white/60 hover:text-white'
             }`}
           >
             <Grid className="w-3.5 h-3.5" />
@@ -62,33 +71,33 @@ export const GridView: React.FC<GridViewProps> = ({
         {slides.map((slide, idx) => (
           <div
             key={slide.id || idx}
-            className="flex flex-col rounded-3xl bg-slate-900/80 border border-slate-800 overflow-hidden hover:border-slate-700 transition-all shadow-xl p-4 space-y-3 group"
+            className="flex flex-col rounded-2xl bg-[#14151B] border border-white/[0.08] overflow-hidden hover:border-white/20 transition-all shadow-xl p-4 space-y-3 group"
           >
             {/* Slide Header Toolbar */}
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center space-x-2">
-                <span className="w-6 h-6 rounded-lg bg-indigo-600 text-white font-black flex items-center justify-center text-xs shadow-md">
+                <span className="w-5 h-5 rounded-md bg-white/[0.1] text-white font-mono font-bold flex items-center justify-center text-xs">
                   {idx + 1}
                 </span>
-                <span className="text-xs font-bold text-slate-300">
-                  {slide.type === 'cover' ? '표지 (Cover)' : slide.type === 'cta' ? 'CTA 엔딩' : `본문 슬라이드 ${idx}`}
+                <span className="text-xs font-semibold text-white/80">
+                  {slide.type === 'cover' ? '표지 (Cover)' : slide.type === 'cta' ? 'CTA 엔딩' : `본문 0${idx}`}
                 </span>
               </div>
 
               {/* Action Buttons */}
               <button
                 onClick={() => onDownloadSingleSlide(slide.id, idx + 1)}
-                className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white text-xs font-semibold border border-slate-700 transition-all cursor-pointer"
+                className="flex items-center space-x-1 px-2.5 py-1 rounded-md bg-white/[0.08] hover:bg-white/[0.15] text-white/80 hover:text-white text-xs font-medium border border-white/[0.08] transition-all cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>PNG 다운로드</span>
+                <span>PNG 저장</span>
               </button>
             </div>
 
             {/* Rendered 4:5 Slide Canvas Frame */}
             <div
               style={{ width: `${cardWidth}px`, height: `${cardHeight}px` }}
-              className="relative mx-auto rounded-2xl overflow-hidden shadow-lg border border-slate-800/80 bg-slate-950 flex-shrink-0"
+              className="relative mx-auto rounded-xl overflow-hidden shadow-lg border border-white/[0.06] bg-[#0C0D10] flex-shrink-0"
             >
               <SlideCard
                 slide={slide}
@@ -97,6 +106,7 @@ export const GridView: React.FC<GridViewProps> = ({
                 totalSlides={slides.length}
                 scale={canvasScale}
                 showSafeZoneGuide={showSafeZoneGuide}
+                aspectRatio={aspectRatio}
               />
             </div>
           </div>

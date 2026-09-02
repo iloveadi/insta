@@ -6,6 +6,12 @@ export type CardNewsCategory =
   | 'story_insight'; // 스토리/인사이트형
 
 export type ThemePresetId = 
+  | 'studio_editorial'
+  | 'obsidian_acid'
+  | 'nordic_forest'
+  | 'seoul_monochrome'
+  | 'sunset_terracotta'
+  | 'clean_atelier'
   | 'modern_dark'
   | 'clean_minimal'
   | 'soft_gradient'
@@ -17,7 +23,7 @@ export type ThemePresetId =
   | 'contrast_teal_coral'
   | 'contrast_yellow_black';
 
-export type AspectRatio = '1:1' | '4:5';
+export type AspectRatio = '1:1' | '4:5' | '3:4';
 
 export interface ThemeConfig {
   id: ThemePresetId;
@@ -28,7 +34,7 @@ export interface ThemeConfig {
   textPrimary: string;
   textSecondary: string;
   accentColor: string;
-  accentGradient: string;
+  accentGradient?: string;
   accentBg: string;
   borderStyle: string;
   tagBg: string;
@@ -40,6 +46,10 @@ export interface ThemeConfig {
   footerText: string;
   footerBadge: string;
   isDark: boolean;
+  eyebrowColor?: string;
+  highlightBg?: string;
+  highlightText?: string;
+  dividerColor?: string;
 }
 
 export type SlideType = 'cover' | 'content' | 'checklist' | 'comparison' | 'quote' | 'cta';
@@ -77,6 +87,8 @@ export interface CardNewsProject {
   slides: Slide[];
 }
 
+export type ContentTone = 'fun_humor' | 'relatable_meme' | 'story_trivia' | 'balance_game' | 'informative';
+
 export interface GenerationRequest {
   topic: string;
   targetAudience: string;
@@ -85,6 +97,7 @@ export interface GenerationRequest {
   theme: ThemePresetId;
   aspectRatio: AspectRatio;
   brandHandle: string;
+  tone?: ContentTone;
   includeImages?: boolean;
   apiKey?: string;
 }
