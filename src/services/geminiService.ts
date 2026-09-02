@@ -131,9 +131,36 @@ export async function generateCardNews(request: GenerationRequest): Promise<Card
   "instagram_caption": "..."
 }`;
 
+  // Auto-retry helper for temporary Google server spikes (503 / 429)
+  const fetchWithRetry = async (targetUrl: string, targetOptions: RequestInit, maxRetries = 3): Promise<Response> => {
+    let attempt = 0;
+    while (attempt < maxRetries) {
+      attempt++;
+      try {
+        const res = await fetch(targetUrl, targetOptions);
+        if ((res.status === 503 || res.status === 429) && attempt < maxRetries) {
+          const delay = attempt * 1500;
+          console.warn(`[Gemini API ${res.status}] 일시적 구글 서버 과부하 감지. ${delay}ms 후 자동 재시도 중 (${attempt}/${maxRetries})...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        return res;
+      } catch (networkErr) {
+        if (attempt < maxRetries) {
+          const delay = attempt * 1500;
+          console.warn(`[Gemini 통신 지연] ${delay}ms 후 재시도 중 (${attempt}/${maxRetries})...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        throw networkErr;
+      }
+    }
+    return fetch(targetUrl, targetOptions);
+  };
+
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${OFFICIAL_MODEL}:generateContent?key=${encodeURIComponent(rawKey)}`;
 
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -159,6 +186,10 @@ export async function generateCardNews(request: GenerationRequest): Promise<Card
     const errorMsg = errJson?.error?.message || `HTTP ${res.status}`;
     const lastError = `[Status ${res.status}] ${errorMsg}`;
     console.error(`[Gemini Gen ${OFFICIAL_MODEL} Failed]:`, lastError);
+
+    if (res.status === 503) {
+      throw new Error('구글 AI 서버에 일시적인 전 세계 이용자 급증(503 과부하)이 발생했습니다. 잠시 후(5~10초 뒤) 다시 생성 버튼을 눌러주세요.');
+    }
     throw new Error(`Google API 호출 실패: ${lastError}`);
   }
 
